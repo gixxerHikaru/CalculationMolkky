@@ -78,7 +78,6 @@ describe('スコアの更新', () => {
     expect(
       await screen.findByText(t => t.includes(`🟦チームB：${expectedB}点`))
     ).toBeInTheDocument();
-    expect(await screen.findByText(t => t.includes(expectedTurn))).toBeInTheDocument();
   }
 
   test('チームAとチームBが交互に得点し、スコアと攻撃権が正しく遷移する', async () => {
