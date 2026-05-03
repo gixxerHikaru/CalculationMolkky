@@ -1,5 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
-import { expect, test } from 'vitest';
+import { assert, expect, test } from 'vitest';
 import Home from '../../app/routes/home';
 import { createRoutesStub } from 'react-router';
 import { CalculationMolkky } from '~/routes/CalculationMolkky';
@@ -152,7 +152,7 @@ describe('スコアの更新', () => {
     expect(teamBBox).not.toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
   });
 
-  test('ファウルボタンを押すと、得点は加算されずに攻撃権が移り、合計スコアの右隣にファウル回数が表示される', async () => {
+  test('ファウルボタンを押すと、得点は加算されずに攻撃権が移り、合計スコアの下にファウル回数が表示される', async () => {
     render(<Stub initialEntries={['/calculation_molkky']} />);
 
     const foulButton = await screen.findByRole('button', { name: 'ファウル' });
@@ -162,6 +162,24 @@ describe('スコアの更新', () => {
     expect(await screen.findByText('🟦チームBの番です')).toBeInTheDocument();
     await assertTeamState('A', 0, 1);
     await assertTeamState('B', 0, 0);
+  });
+
+  test('ファウル回数が表示されている状態で、得点をすると得点した側のファウル回数がリセットされる', async () => {
+    render(<Stub initialEntries={['/calculation_molkky']} />);
+
+    const foulButton = await screen.findByRole('button', { name: 'ファウル' });
+    await user.click(foulButton);
+
+    await assertTeamState('A', 0, 1);
+
+    assert.isOk(screen.getByText('🟦チームBの番です'), 'チームBの番が表示されていること');
+    await user.click(foulButton);
+    await assertTeamState('A', 0, 1);
+    await assertTeamState('B', 0, 1);
+
+    await playAndAssert(5, 0, 5, '🟥チームAの番です');
+    await assertTeamState('A', 5, 0);
+    await assertTeamState('B', 0, 1);
   });
 
   test('戻るボタンを押すと、前の状態に戻る', async () => {
