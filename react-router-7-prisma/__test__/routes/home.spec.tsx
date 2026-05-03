@@ -1,24 +1,24 @@
-import { render, screen } from "@testing-library/react";
-import { expect, test } from "vitest";
-import Home from "../../app/routes/home";
-import { createRoutesStub } from "react-router";
-import Welcome from "../../app/welcome/welcome";
+import { render, screen } from '@testing-library/react';
+import { expect, test } from 'vitest';
+import Home from '../../app/routes/home';
+import { createRoutesStub } from 'react-router';
+import { CalculationMolkky } from '~/routes/CalculationMolkky';
 
-test("renders the home page", () => {
+test('「モルック・スコア計算」のタイトルが見える', () => {
   const Stub = createRoutesStub([
     {
-      path: "/",
+      path: '/',
       Component: Home,
       children: [
         {
-          path: "/welcome",
-          Component: Welcome,
+          path: 'calculation_molkky',
+          Component: CalculationMolkky,
         },
       ],
     },
   ]);
-  render(<Stub initialEntries={["/welcome"]} />);
+  render(<Stub initialEntries={['/calculation_molkky']} />);
   console.log(screen);
 
-  expect(screen.getByText("Welcome to React Router v7!"));
+  expect(screen.getByText('モルック・スコア計算'));
 });
