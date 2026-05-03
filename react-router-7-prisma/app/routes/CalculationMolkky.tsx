@@ -84,9 +84,11 @@ export function CalculationMolkky() {
         className={`flex-1 p-4 transition-all ${current.turn === team ? ' bg-yellow-100 dark:bg-yellow-900/20 ring-2 ring-inset ring-yellow-500' : ''}`}
       >
         <div className="flex flex-col items-center gap-1">
-          <span className="text-xs font-bold text-gray-500 dark:text-gray-400">TEAM {team}</span>
+          <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
+            TEAM {team == 'A' ? 'A🟥' : 'B🟦'}
+          </span>
           <div className="flex items-center gap-2">
-            {team == 'A' ? `🟥チームA：${current.scoreA}点` : `🟦チームB：${current.scoreB}点`}
+            {team == 'A' ? `${current.scoreA}点` : `${current.scoreB}点`}
           </div>
         </div>
       </div>

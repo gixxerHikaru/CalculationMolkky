@@ -27,8 +27,13 @@ describe('初期表示', () => {
 
   test('2チームの合計得点が見える', () => {
     render(<Stub initialEntries={['/calculation_molkky']} />);
-    expect(screen.getByText('🟥チームA：0点'));
-    expect(screen.getByText('🟦チームB：0点'));
+    expect(screen.getByText('TEAM A🟥'));
+    const sectionA = screen.getByText('TEAM A🟥').closest('div');
+    expect(sectionA).toHaveTextContent('0点');
+    expect(screen.getByText('VS'));
+    expect(screen.getByText('TEAM B🟦'));
+    const sectionB = screen.getByText('TEAM B🟦').closest('div');
+    expect(sectionB).toHaveTextContent('0点');
   });
 
   test('1~12のスコアボタンとFoulボタンが見える', () => {
@@ -56,6 +61,21 @@ describe('初期表示', () => {
 });
 
 describe('スコアの更新', () => {
+  async function assertTeamScore(team: 'A' | 'B', expectedScore: number) {
+    const teamBox = document.querySelector(`#team-${team.toLowerCase()}-box`);
+
+    expect(teamBox).toHaveTextContent(`${expectedScore}点`);
+  }
+
+  async function assertState(expectedA: number, expectedB: number, expectedTurn?: string) {
+    await assertTeamScore('A', expectedA);
+    await assertTeamScore('B', expectedB);
+
+    if (expectedTurn) {
+      expect(await screen.findByText(expectedTurn)).toBeInTheDocument();
+    }
+  }
+
   async function playAndAssert(
     point: number,
     expectedA: number,
@@ -64,20 +84,13 @@ describe('スコアの更新', () => {
   ) {
     const button = screen.getByRole('button', { name: `${point}点` });
     button.click();
-    expect(await screen.findByText(`🟥チームA：${expectedA}点`)).toBeInTheDocument();
-    expect(await screen.findByText(`🟦チームB：${expectedB}点`)).toBeInTheDocument();
-    expect(await screen.findByText(expectedTurn)).toBeInTheDocument();
+    assertState(expectedA, expectedB, expectedTurn);
   }
 
   async function clickBackAndAssert(expectedA: number, expectedB: number, expectedTurn: string) {
     const button = screen.getByRole('button', { name: '戻る' });
     button.click();
-    expect(
-      await screen.findByText(t => t.includes(`🟥チームA：${expectedA}点`))
-    ).toBeInTheDocument();
-    expect(
-      await screen.findByText(t => t.includes(`🟦チームB：${expectedB}点`))
-    ).toBeInTheDocument();
+    assertState(expectedA, expectedB);
   }
 
   test('チームAとチームBが交互に得点し、スコアと攻撃権が正しく遷移する', async () => {
