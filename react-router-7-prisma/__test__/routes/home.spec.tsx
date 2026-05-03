@@ -25,8 +25,8 @@ test('「モルック・スコア計算」のタイトルが見える', () => {
 
 test('2チームの合計得点が見える', () => {
   render(<Stub initialEntries={['/calculation_molkky']} />);
-  expect(screen.getByText('チームA：0点'));
-  expect(screen.getByText('チームB：0点'));
+  expect(screen.getByText('🟥チームA：0点'));
+  expect(screen.getByText('🟦チームB：0点'));
 });
 
 test('1~12のスコアボタンとFoulボタンが見える', () => {
@@ -45,4 +45,9 @@ test('1~12のスコアボタンとFoulボタンが見える', () => {
   expect(screen.getByRole('button', { name: '12点' }));
   expect(screen.getByRole('button', { name: 'ファウル' }));
   expect(screen.getByRole('button', { name: '戻る' }));
+});
+
+test('チームAの番ですが見える', () => {
+  render(<Stub initialEntries={['/calculation_molkky']} />);
+  expect(screen.getByText('🟥チームAの番です'));
 });
