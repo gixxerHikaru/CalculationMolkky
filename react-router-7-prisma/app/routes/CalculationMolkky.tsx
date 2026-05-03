@@ -2,11 +2,25 @@ import { useState } from 'react';
 
 type Team = 'A' | 'B';
 type TeamMessage = '🟥チームAの番です' | '🟦チームBの番です';
+type State = {
+  scoreA: number;
+  scoreB: number;
+  turn: 'A' | 'B';
+};
+
+const initialState: State = { scoreA: 0, scoreB: 0, turn: 'A' };
 
 export function CalculationMolkky() {
-  const [currentTeam, setCurrentTeam] = useState('A');
-  const [scoreA, setScoreA] = useState(0);
-  const [scoreB, setScoreB] = useState(0);
+  const [history, setHistory] = useState<State[]>([initialState]);
+  const current = history[history.length - 1];
+  const handleScore = (point: number) => {
+    setHistory(prev => [
+      ...prev,
+      current.turn === 'A'
+        ? { scoreA: current.scoreA + point, scoreB: current.scoreB, turn: 'B' }
+        : { scoreA: current.scoreA, scoreB: current.scoreB + point, turn: 'A' },
+    ]);
+  };
 
   let teamMessage: TeamMessage = getTeamMessage();
 
@@ -18,8 +32,8 @@ export function CalculationMolkky() {
         </header>
 
         <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
-          <p className="text-sm mb-2">🟥チームA：{scoreA}点</p>
-          <p className="text-sm ">🟦チームB：{scoreB}点</p>
+          <p className="text-sm mb-2">🟥チームA：{current.scoreA}点</p>
+          <p className="text-sm ">🟦チームB：{current.scoreB}点</p>
         </div>
 
         <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
@@ -33,7 +47,7 @@ export function CalculationMolkky() {
                 key={i + 1}
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-300"
                 onClick={() => {
-                  culculateScore(i);
+                  handleScore(i + 1);
                 }}
               >
                 {i + 1}点
@@ -54,7 +68,7 @@ export function CalculationMolkky() {
 
   function getTeamMessage() {
     let teamMessage: TeamMessage = '🟥チームAの番です';
-    switch (currentTeam) {
+    switch (current.turn) {
       case 'A':
         teamMessage = '🟥チームAの番です';
         break;
@@ -63,18 +77,5 @@ export function CalculationMolkky() {
         break;
     }
     return teamMessage;
-  }
-
-  function culculateScore(i: number) {
-    switch (currentTeam) {
-      case 'A':
-        setScoreA(prev => prev + i + 1);
-        setCurrentTeam('B');
-        break;
-      case 'B':
-        setScoreB(prev => prev + i + 1);
-        setCurrentTeam('A');
-        break;
-    }
   }
 }
