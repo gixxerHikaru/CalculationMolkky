@@ -21,6 +21,11 @@ export function CalculationMolkky() {
         : { scoreA: current.scoreA, scoreB: current.scoreB + point, turn: 'A' },
     ]);
   };
+  const handleBack = () => {
+    if (history.length > 1) {
+      setHistory(prev => prev.slice(0, -1));
+    }
+  };
 
   let teamMessage: TeamMessage = getTeamMessage();
 
@@ -57,7 +62,10 @@ export function CalculationMolkky() {
             <button className="flex items-center justify-center h-16 text-lg font-bold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl active:scale-95 transition-all border border-red-100 dark:border-red-800">
               ファウル
             </button>
-            <button className="flex items-center justify-center h-16 text-lg font-bold bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl active:scale-95 transition-all border border-amber-100 dark:border-amber-800">
+            <button
+              className="flex items-center justify-center h-16 text-lg font-bold bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl active:scale-95 transition-all border border-amber-100 dark:border-amber-800"
+              onClick={() => handleBack()}
+            >
               戻る
             </button>
           </div>

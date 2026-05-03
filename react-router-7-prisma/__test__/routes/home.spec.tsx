@@ -69,6 +69,18 @@ describe('スコアの更新', () => {
     expect(await screen.findByText(expectedTurn)).toBeInTheDocument();
   }
 
+  async function clickBackAndAssert(expectedA: number, expectedB: number, expectedTurn: string) {
+    const button = screen.getByRole('button', { name: '戻る' });
+    button.click();
+    expect(
+      await screen.findByText(t => t.includes(`🟥チームA：${expectedA}点`))
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText(t => t.includes(`🟦チームB：${expectedB}点`))
+    ).toBeInTheDocument();
+    expect(await screen.findByText(t => t.includes(expectedTurn))).toBeInTheDocument();
+  }
+
   test('チームAとチームBが交互に得点し、スコアと攻撃権が正しく遷移する', async () => {
     render(<Stub initialEntries={['/calculation_molkky']} />);
 
@@ -90,5 +102,14 @@ describe('スコアの更新', () => {
     for (const step of steps) {
       await playAndAssert(step.point, step.a, step.b, step.nextTurn);
     }
+  });
+
+  test('戻るボタンを押すと、前の状態に戻る', async () => {
+    render(<Stub initialEntries={['/calculation_molkky']} />);
+    await playAndAssert(5, 5, 0, '🟦チームBの番です');
+    await playAndAssert(3, 5, 3, '🟥チームAの番です');
+
+    await clickBackAndAssert(5, 0, '🟦チームBの番です');
+    await clickBackAndAssert(0, 0, '🟥チームAの番です');
   });
 });
