@@ -37,8 +37,12 @@ export function CalculationMolkky() {
         </header>
 
         <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
-          <p className="text-sm mb-2">🟥チームA：{current.scoreA}点</p>
-          <p className="text-sm ">🟦チームB：{current.scoreB}点</p>
+          <p className={`text-sm mb-2 ${current.turn === 'A' ? 'bg-yellow-800' : ''}`}>
+            🟥チームA：{current.scoreA}点
+          </p>
+          <p className={`text-sm ${current.turn === 'B' ? 'bg-yellow-800' : ''}`}>
+            🟦チームB：{current.scoreB}点
+          </p>
         </div>
 
         <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">

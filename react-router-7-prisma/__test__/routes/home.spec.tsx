@@ -103,6 +103,26 @@ describe('スコアの更新', () => {
     }
   });
 
+  test('番手のチームの合計スコアにハイライトが当たり、そうでないチームにはつかない', async () => {
+    render(<Stub initialEntries={['/calculation_molkky']} />);
+    let teamABox = await screen.findByText('🟥チームA：0点');
+    let teamBBox = await screen.findByText('🟦チームB：0点');
+    expect(teamABox).toHaveClass('bg-yellow-800');
+    expect(teamBBox).not.toHaveClass('bg-yellow-800');
+
+    await playAndAssert(5, 5, 0, '🟦チームBの番です');
+    teamABox = await screen.findByText('🟥チームA：5点');
+    teamBBox = await screen.findByText('🟦チームB：0点');
+    expect(teamABox).not.toHaveClass('bg-yellow-800');
+    expect(teamBBox).toHaveClass('bg-yellow-800');
+
+    await clickBackAndAssert(5, 0, '🟦チームBの番です');
+    teamABox = await screen.findByText('🟥チームA：0点');
+    teamBBox = await screen.findByText('🟦チームB：0点');
+    expect(teamABox).toHaveClass('bg-yellow-800');
+    expect(teamBBox).not.toHaveClass('bg-yellow-800');
+  });
+
   test('戻るボタンを押すと、前の状態に戻る', async () => {
     render(<Stub initialEntries={['/calculation_molkky']} />);
     await playAndAssert(5, 5, 0, '🟦チームBの番です');
