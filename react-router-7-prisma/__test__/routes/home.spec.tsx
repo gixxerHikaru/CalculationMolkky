@@ -104,23 +104,23 @@ describe('スコアの更新', () => {
   });
 
   test('番手のチームの合計スコアにハイライトが当たり、そうでないチームにはつかない', async () => {
-    render(<Stub initialEntries={['/calculation_molkky']} />);
-    let teamABox = await screen.findByText('🟥チームA：0点');
-    let teamBBox = await screen.findByText('🟦チームB：0点');
-    expect(teamABox).toHaveClass('bg-yellow-800');
-    expect(teamBBox).not.toHaveClass('bg-yellow-800');
+    const { container } = render(<Stub initialEntries={['/calculation_molkky']} />);
+    let teamABox = container.querySelector('#team-a-box');
+    let teamBBox = container.querySelector('#team-b-box');
+    expect(teamABox).toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
+    expect(teamBBox).not.toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
 
     await playAndAssert(5, 5, 0, '🟦チームBの番です');
-    teamABox = await screen.findByText('🟥チームA：5点');
-    teamBBox = await screen.findByText('🟦チームB：0点');
-    expect(teamABox).not.toHaveClass('bg-yellow-800');
-    expect(teamBBox).toHaveClass('bg-yellow-800');
+    teamABox = container.querySelector('#team-a-box');
+    teamBBox = container.querySelector('#team-b-box');
+    expect(teamABox).not.toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
+    expect(teamBBox).toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
 
     await clickBackAndAssert(5, 0, '🟦チームBの番です');
-    teamABox = await screen.findByText('🟥チームA：0点');
-    teamBBox = await screen.findByText('🟦チームB：0点');
-    expect(teamABox).toHaveClass('bg-yellow-800');
-    expect(teamBBox).not.toHaveClass('bg-yellow-800');
+    teamABox = container.querySelector('#team-a-box');
+    teamBBox = container.querySelector('#team-b-box');
+    expect(teamABox).toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
+    expect(teamBBox).not.toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
   });
 
   test('戻るボタンを押すと、前の状態に戻る', async () => {

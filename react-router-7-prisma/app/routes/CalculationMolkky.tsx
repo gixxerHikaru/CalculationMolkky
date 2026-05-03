@@ -36,13 +36,12 @@ export function CalculationMolkky() {
           <h1 className="text-xl font-bold">モルック・スコア計算</h1>
         </header>
 
-        <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
-          <p className={`text-sm mb-2 ${current.turn === 'A' ? 'bg-yellow-800' : ''}`}>
-            🟥チームA：{current.scoreA}点
-          </p>
-          <p className={`text-sm ${current.turn === 'B' ? 'bg-yellow-800' : ''}`}>
-            🟦チームB：{current.scoreB}点
-          </p>
+        <div className="w-full flex items-stretch bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
+          {displayTeamScore('A')}
+          <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-2 text-[10px] font-bold text-gray-400 border-x border-gray-100 dark:border-gray-700">
+            VS
+          </div>
+          {displayTeamScore('B')}
         </div>
 
         <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
@@ -77,6 +76,22 @@ export function CalculationMolkky() {
       </div>
     </main>
   );
+
+  function displayTeamScore(team: Team) {
+    return (
+      <div
+        id={team == 'A' ? 'team-a-box' : 'team-b-box'}
+        className={`flex-1 p-4 transition-all ${current.turn === team ? ' bg-yellow-100 dark:bg-yellow-900/20 ring-2 ring-inset ring-yellow-500' : ''}`}
+      >
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-xs font-bold text-gray-500 dark:text-gray-400">TEAM {team}</span>
+          <div className="flex items-center gap-2">
+            {team == 'A' ? `🟥チームA：${current.scoreA}点` : `🟦チームB：${current.scoreB}点`}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   function getTeamMessage() {
     let teamMessage: TeamMessage = '🟥チームAの番です';
