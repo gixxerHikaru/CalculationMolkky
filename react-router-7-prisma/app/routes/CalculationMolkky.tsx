@@ -4,11 +4,13 @@ type Team = 'A' | 'B';
 type TeamMessage = '🟥チームAの番です' | '🟦チームBの番です';
 type State = {
   scoreA: number;
+  foulA: number;
   scoreB: number;
+  foulB: number;
   turn: 'A' | 'B';
 };
 
-const initialState: State = { scoreA: 0, scoreB: 0, turn: 'A' };
+const initialState: State = { scoreA: 0, foulA: 0, scoreB: 0, foulB: 0, turn: 'A' };
 
 export function CalculationMolkky() {
   const [history, setHistory] = useState<State[]>([initialState]);
@@ -17,8 +19,20 @@ export function CalculationMolkky() {
     setHistory(prev => [
       ...prev,
       current.turn === 'A'
-        ? { scoreA: current.scoreA + point, scoreB: current.scoreB, turn: 'B' }
-        : { scoreA: current.scoreA, scoreB: current.scoreB + point, turn: 'A' },
+        ? {
+            scoreA: current.scoreA + point,
+            foulA: point == 0 ? current.foulA + 1 : current.foulA,
+            scoreB: current.scoreB,
+            foulB: current.foulB,
+            turn: 'B',
+          }
+        : {
+            scoreA: current.scoreA,
+            foulA: current.foulA,
+            scoreB: current.scoreB + point,
+            foulB: point == 0 ? current.foulB + 1 : current.foulB,
+            turn: 'A',
+          },
     ]);
   };
   const handleBack = () => {
@@ -62,7 +76,10 @@ export function CalculationMolkky() {
               </button>
             ))}
             <div />
-            <button className="flex items-center justify-center h-16 text-lg font-bold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl active:scale-95 transition-all border border-red-100 dark:border-red-800">
+            <button
+              className="flex items-center justify-center h-16 text-lg font-bold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl active:scale-95 transition-all border border-red-100 dark:border-red-800"
+              onClick={() => handleScore(0)}
+            >
               ファウル
             </button>
             <button
@@ -78,9 +95,11 @@ export function CalculationMolkky() {
   );
 
   function displayTeamScore(team: Team) {
+    const foulCount = team === 'A' ? current.foulA : current.foulB;
     return (
       <div
         id={team == 'A' ? 'team-a-box' : 'team-b-box'}
+        data-testid={team == 'A' ? 'team-a-box' : 'team-b-box'}
         className={`flex-1 p-4 transition-all ${current.turn === team ? ' bg-yellow-100 dark:bg-yellow-900/20 ring-2 ring-inset ring-yellow-500' : ''}`}
       >
         <div className="flex flex-col items-center gap-1">
@@ -90,6 +109,13 @@ export function CalculationMolkky() {
           <div className="flex items-center gap-2">
             {team == 'A' ? `${current.scoreA}点` : `${current.scoreB}点`}
           </div>
+          {foulCount > 0 && (
+            <div className="mt-1 text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
+              <span className="bg-red-100 dark:bg-red-900/40 px-2 py-0.5 rounded">
+                ファウル：{foulCount}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     );

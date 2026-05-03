@@ -1,9 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { expect, test } from 'vitest';
 import Home from '../../app/routes/home';
 import { createRoutesStub } from 'react-router';
 import { CalculationMolkky } from '~/routes/CalculationMolkky';
 import { describe } from 'vitest';
+import userEvent from '@testing-library/user-event';
 
 const Stub = createRoutesStub([
   {
@@ -62,7 +63,7 @@ describe('初期表示', () => {
 
 describe('スコアの更新', () => {
   async function assertTeamScore(team: 'A' | 'B', expectedScore: number) {
-    const teamBox = document.querySelector(`#team-${team.toLowerCase()}-box`);
+    const teamBox = await screen.findByTestId(team === 'A' ? 'team-a-box' : 'team-b-box');
 
     expect(teamBox).toHaveTextContent(`${expectedScore}点`);
   }
@@ -76,20 +77,35 @@ describe('スコアの更新', () => {
     }
   }
 
+  async function assertTeamState(team: 'A' | 'B', expectedScore: number, expectedFoul: number) {
+    const teamId = team === 'A' ? 'team-a-box' : 'team-b-box';
+    const teamBox = await screen.findByTestId(teamId);
+
+    expect(within(teamBox).getByText(`${expectedScore}点`)).toBeInTheDocument();
+
+    if (expectedFoul > 0) {
+      expect(within(teamBox).getByText(`ファウル：${expectedFoul}`)).toBeInTheDocument();
+    } else {
+      expect(within(teamBox).queryByText(/ファウル：/)).not.toBeInTheDocument();
+    }
+  }
+
+  const user = userEvent.setup();
+
   async function playAndAssert(
     point: number,
     expectedA: number,
     expectedB: number,
     expectedTurn: string
   ) {
-    const button = screen.getByRole('button', { name: `${point}点` });
-    button.click();
+    const button = await screen.findByRole('button', { name: `${point}点` });
+    await user.click(button);
     assertState(expectedA, expectedB, expectedTurn);
   }
 
   async function clickBackAndAssert(expectedA: number, expectedB: number, expectedTurn: string) {
-    const button = screen.getByRole('button', { name: '戻る' });
-    button.click();
+    const button = await screen.findByRole('button', { name: '戻る' });
+    await user.click(button);
     assertState(expectedA, expectedB);
   }
 
@@ -117,23 +133,35 @@ describe('スコアの更新', () => {
   });
 
   test('番手のチームの合計スコアにハイライトが当たり、そうでないチームにはつかない', async () => {
-    const { container } = render(<Stub initialEntries={['/calculation_molkky']} />);
-    let teamABox = container.querySelector('#team-a-box');
-    let teamBBox = container.querySelector('#team-b-box');
+    render(<Stub initialEntries={['/calculation_molkky']} />);
+    let teamABox = await screen.findByTestId('team-a-box');
+    let teamBBox = await screen.findByTestId('team-b-box');
     expect(teamABox).toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
     expect(teamBBox).not.toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
 
     await playAndAssert(5, 5, 0, '🟦チームBの番です');
-    teamABox = container.querySelector('#team-a-box');
-    teamBBox = container.querySelector('#team-b-box');
+    teamABox = await screen.findByTestId('team-a-box');
+    teamBBox = await screen.findByTestId('team-b-box');
     expect(teamABox).not.toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
     expect(teamBBox).toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
 
     await clickBackAndAssert(5, 0, '🟦チームBの番です');
-    teamABox = container.querySelector('#team-a-box');
-    teamBBox = container.querySelector('#team-b-box');
+    teamABox = await screen.findByTestId('team-a-box');
+    teamBBox = await screen.findByTestId('team-b-box');
     expect(teamABox).toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
     expect(teamBBox).not.toHaveClass('bg-yellow-100 dark:bg-yellow-900/20');
+  });
+
+  test('ファウルボタンを押すと、得点は加算されずに攻撃権が移り、合計スコアの右隣にファウル回数が表示される', async () => {
+    render(<Stub initialEntries={['/calculation_molkky']} />);
+
+    const foulButton = await screen.findByRole('button', { name: 'ファウル' });
+
+    await user.click(foulButton);
+
+    expect(await screen.findByText('🟦チームBの番です')).toBeInTheDocument();
+    await assertTeamState('A', 0, 1);
+    await assertTeamState('B', 0, 0);
   });
 
   test('戻るボタンを押すと、前の状態に戻る', async () => {
