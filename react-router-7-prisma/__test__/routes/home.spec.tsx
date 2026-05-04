@@ -222,7 +222,6 @@ describe('スコアの更新', () => {
         await playAndAssert(step.point, step.a, step.b);
       }
 
-      console.log(screen.debug());
       await playAndAssert(2, 50, 48);
 
       const winMsg = await screen.findByText('🟥 チームA の勝利！');
@@ -246,11 +245,39 @@ describe('スコアの更新', () => {
         await playAndAssert(step.point, step.a, step.b);
       }
 
-      console.log(screen.debug());
       await playAndAssert(2, 5, 50);
 
       const winMsg = await screen.findByText('🟦 チームB の勝利！');
       assert.exists(winMsg);
+    });
+
+    test('モーダルには「もう一度」ボタンがあり、押すと初期状態からゲームができる画面になる', async () => {
+      render(<Stub initialEntries={['/calculation_molkky']} />);
+      const steps = [
+        { point: 12, a: 12, b: 0 },
+        { point: 12, a: 12, b: 12 },
+        { point: 12, a: 24, b: 12 },
+        { point: 12, a: 24, b: 24 },
+        { point: 12, a: 36, b: 24 },
+        { point: 12, a: 36, b: 36 },
+        { point: 12, a: 48, b: 36 },
+        { point: 12, a: 48, b: 48 },
+      ];
+      for (const step of steps) {
+        await playAndAssert(step.point, step.a, step.b);
+      }
+      await playAndAssert(2, 50, 48);
+
+      const winMsg = await screen.findByText('🟥 チームA の勝利！');
+      assert.exists(winMsg);
+
+      const resetButton = await screen.findByRole('button', { name: 'もう一度' });
+      await user.click(resetButton);
+
+      expect(screen.getByText('🟥チームAの番です'));
+      assertTeamState('A', 0, 0);
+      expect(screen.getByText('VS'));
+      assertTeamState('B', 0, 0);
     });
   });
 
@@ -283,6 +310,27 @@ describe('スコアの更新', () => {
 
       const loseMsg = await screen.findByText('🟦 チームB の敗北…');
       assert.exists(loseMsg);
+    });
+    test('モーダルには「もう一度」ボタンがあり、押すと初期状態からゲームができる画面になる', async () => {
+      render(<Stub initialEntries={['/calculation_molkky']} />);
+      const foulButton = await screen.findByRole('button', { name: 'ファウル' });
+
+      await user.click(foulButton);
+      await playAndAssert(1, 0, 1);
+      await user.click(foulButton);
+      await playAndAssert(1, 0, 2);
+      await user.click(foulButton);
+
+      const loseMsg = await screen.findByText('🟥 チームA の敗北…');
+      assert.exists(loseMsg);
+
+      const resetButton = await screen.findByRole('button', { name: 'もう一度' });
+      await user.click(resetButton);
+
+      expect(screen.getByText('🟥チームAの番です'));
+      assertTeamState('A', 0, 0);
+      expect(screen.getByText('VS'));
+      assertTeamState('B', 0, 0);
     });
   });
 });

@@ -112,6 +112,7 @@ export function CalculationMolkky() {
             <h2 className="text-2xl font-bold">
               {winner === 'A' ? '🟥 チームA' : '🟦 チームB'} の勝利！
             </h2>
+            {againButton()}
           </div>
         </div>
       )}
@@ -121,11 +122,27 @@ export function CalculationMolkky() {
             <h2 className="text-2xl font-bold">
               {loser === 'A' ? '🟥 チームA' : '🟦 チームB'} の敗北…
             </h2>
+            {againButton()}
           </div>
         </div>
       )}
     </main>
   );
+
+  function againButton() {
+    return (
+      <button
+        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300"
+        onClick={() => {
+          setWinner(null);
+          setLoser(null);
+          setHistory([initialState]);
+        }}
+      >
+        もう一度
+      </button>
+    );
+  }
 
   function displayTeamScore(team: Team) {
     const foulCount = team === 'A' ? current.foulA : current.foulB;
