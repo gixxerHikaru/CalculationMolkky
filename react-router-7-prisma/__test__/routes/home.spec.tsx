@@ -253,4 +253,36 @@ describe('スコアの更新', () => {
       assert.exists(winMsg);
     });
   });
+
+  describe('敗北条件', () => {
+    test('ファウルが3回になると、そのチームの敗北が表示される', async () => {
+      render(<Stub initialEntries={['/calculation_molkky']} />);
+
+      const foulButton = await screen.findByRole('button', { name: 'ファウル' });
+
+      await user.click(foulButton);
+      await playAndAssert(1, 0, 1);
+      await user.click(foulButton);
+      await playAndAssert(1, 0, 2);
+      await user.click(foulButton);
+
+      const loseMsg = await screen.findByText('🟥 チームA の敗北…');
+      assert.exists(loseMsg);
+    });
+    test('ファウルが3回になると、そのチームの敗北が表示される', async () => {
+      render(<Stub initialEntries={['/calculation_molkky']} />);
+
+      const foulButton = await screen.findByRole('button', { name: 'ファウル' });
+
+      await playAndAssert(1, 1, 0);
+      await user.click(foulButton);
+      await playAndAssert(1, 2, 0);
+      await user.click(foulButton);
+      await playAndAssert(1, 3, 0);
+      await user.click(foulButton);
+
+      const loseMsg = await screen.findByText('🟦 チームB の敗北…');
+      assert.exists(loseMsg);
+    });
+  });
 });

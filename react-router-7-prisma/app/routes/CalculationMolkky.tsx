@@ -14,6 +14,7 @@ const initialState: State = { scoreA: 0, foulA: 0, scoreB: 0, foulB: 0, turn: 'A
 
 export function CalculationMolkky() {
   const [winner, setWinner] = useState<Team | null>(null);
+  const [loser, setLoser] = useState<Team | null>(null);
   const [history, setHistory] = useState<State[]>([initialState]);
   const current = history[history.length - 1];
   const handleScore = (point: number) => {
@@ -35,10 +36,18 @@ export function CalculationMolkky() {
             turn: 'A',
           },
     ]);
-    if (current.turn === 'A' && current.scoreA + point == 50) {
-      setWinner('A');
-    } else if (current.turn === 'B' && current.scoreB + point == 50) {
-      setWinner('B');
+    if (current.turn === 'A') {
+      if (current.scoreA + point == 50) {
+        setWinner('A');
+      } else if (current.foulA == 2 && point == 0) {
+        setLoser('A');
+      }
+    } else if (current.turn === 'B') {
+      if (current.scoreB + point == 50) {
+        setWinner('B');
+      } else if (current.foulB == 2 && point == 0) {
+        setLoser('B');
+      }
     }
   };
   const handleBack = () => {
@@ -102,6 +111,15 @@ export function CalculationMolkky() {
           <div className="bg-white p-8 rounded-xl shadow-2xl text-center space-y-4">
             <h2 className="text-2xl font-bold">
               {winner === 'A' ? '🟥 チームA' : '🟦 チームB'} の勝利！
+            </h2>
+          </div>
+        </div>
+      )}
+      {loser && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white p-8 rounded-xl shadow-2xl text-center space-y-4">
+            <h2 className="text-2xl font-bold">
+              {loser === 'A' ? '🟥 チームA' : '🟦 チームB'} の敗北…
             </h2>
           </div>
         </div>
