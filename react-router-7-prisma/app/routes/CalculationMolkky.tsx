@@ -20,7 +20,7 @@ export function CalculationMolkky() {
       ...prev,
       current.turn === 'A'
         ? {
-            scoreA: current.scoreA + point,
+            scoreA: current.scoreA + point > 50 ? 25 : current.scoreA + point,
             foulA: point == 0 ? current.foulA + 1 : 0,
             scoreB: current.scoreB,
             foulB: current.foulB,
@@ -29,7 +29,7 @@ export function CalculationMolkky() {
         : {
             scoreA: current.scoreA,
             foulA: current.foulA,
-            scoreB: current.scoreB + point,
+            scoreB: current.scoreB + point > 50 ? 25 : current.scoreB + point,
             foulB: point == 0 ? current.foulB + 1 : 0,
             turn: 'A',
           },
