@@ -13,6 +13,7 @@ type State = {
 const initialState: State = { scoreA: 0, foulA: 0, scoreB: 0, foulB: 0, turn: 'A' };
 
 export function CalculationMolkky() {
+  const [winner, setWinner] = useState<Team | null>(null);
   const [history, setHistory] = useState<State[]>([initialState]);
   const current = history[history.length - 1];
   const handleScore = (point: number) => {
@@ -34,6 +35,11 @@ export function CalculationMolkky() {
             turn: 'A',
           },
     ]);
+    if (current.turn === 'A' && current.scoreA + point == 50) {
+      setWinner('A');
+    } else if (current.turn === 'B' && current.scoreB + point == 50) {
+      setWinner('B');
+    }
   };
   const handleBack = () => {
     if (history.length > 1) {
@@ -91,6 +97,15 @@ export function CalculationMolkky() {
           </div>
         </div>
       </div>
+      {winner && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white p-8 rounded-xl shadow-2xl text-center space-y-4">
+            <h2 className="text-2xl font-bold">
+              {winner === 'A' ? '🟥 チームA' : '🟦 チームB'} の勝利！
+            </h2>
+          </div>
+        </div>
+      )}
     </main>
   );
 

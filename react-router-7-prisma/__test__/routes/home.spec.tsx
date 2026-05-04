@@ -204,4 +204,53 @@ describe('スコアの更新', () => {
     await playAndAssert(12, 25, 48);
     await playAndAssert(12, 25, 25);
   });
+
+  describe('勝利条件', () => {
+    test('50点丁度の場合は勝利モーダルが表示される', async () => {
+      render(<Stub initialEntries={['/calculation_molkky']} />);
+      const steps = [
+        { point: 12, a: 12, b: 0 },
+        { point: 12, a: 12, b: 12 },
+        { point: 12, a: 24, b: 12 },
+        { point: 12, a: 24, b: 24 },
+        { point: 12, a: 36, b: 24 },
+        { point: 12, a: 36, b: 36 },
+        { point: 12, a: 48, b: 36 },
+        { point: 12, a: 48, b: 48 },
+      ];
+      for (const step of steps) {
+        await playAndAssert(step.point, step.a, step.b);
+      }
+
+      console.log(screen.debug());
+      await playAndAssert(2, 50, 48);
+
+      const winMsg = await screen.findByText('🟥 チームA の勝利！');
+      assert.exists(winMsg);
+    });
+
+    test('50点丁度の場合は勝利モーダルが表示される', async () => {
+      render(<Stub initialEntries={['/calculation_molkky']} />);
+      const steps = [
+        { point: 1, a: 1, b: 0 },
+        { point: 12, a: 1, b: 12 },
+        { point: 1, a: 2, b: 12 },
+        { point: 12, a: 2, b: 24 },
+        { point: 1, a: 3, b: 24 },
+        { point: 12, a: 3, b: 36 },
+        { point: 1, a: 4, b: 36 },
+        { point: 12, a: 4, b: 48 },
+        { point: 1, a: 5, b: 48 },
+      ];
+      for (const step of steps) {
+        await playAndAssert(step.point, step.a, step.b);
+      }
+
+      console.log(screen.debug());
+      await playAndAssert(2, 5, 50);
+
+      const winMsg = await screen.findByText('🟦 チームB の勝利！');
+      assert.exists(winMsg);
+    });
+  });
 });
