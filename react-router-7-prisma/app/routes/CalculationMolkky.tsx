@@ -108,7 +108,7 @@ export default function CalculationMolkky() {
       </div>
       {winner && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white p-8 rounded-xl shadow-2xl text-center space-y-4">
+          <div className="bg-white dark:bg-black p-8 rounded-xl shadow-2xl text-center space-y-4">
             <h2 className="text-2xl font-bold">
               {winner === 'A' ? '🟥 チームA' : '🟦 チームB'} の勝利！
             </h2>
@@ -118,7 +118,7 @@ export default function CalculationMolkky() {
       )}
       {loser && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white p-8 rounded-xl shadow-2xl text-center space-y-4">
+          <div className="bg-white dark:bg-black p-8 rounded-xl shadow-2xl text-center space-y-4">
             <h2 className="text-2xl font-bold">
               {loser === 'A' ? '🟥 チームA' : '🟦 チームB'} の敗北…
             </h2>
@@ -132,7 +132,7 @@ export default function CalculationMolkky() {
   function againButton() {
     return (
       <button
-        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300"
+        className="items-center justify-center h-16 w-24 text-lg font-bold bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl active:scale-95 transition-all border border-green-100 dark:border-green-800"
         onClick={() => {
           setWinner(null);
           setLoser(null);
