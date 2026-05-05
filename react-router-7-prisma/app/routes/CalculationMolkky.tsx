@@ -9,6 +9,11 @@ type State = {
   foulB: number;
   turn: 'A' | 'B';
 };
+interface GameResultModalProps {
+  team: Team;
+  type: 'win' | 'lose';
+  onReset: () => void;
+}
 
 const initialState: State = { scoreA: 0, foulA: 0, scoreB: 0, foulB: 0, turn: 'A' };
 
@@ -58,6 +63,12 @@ export default function CalculationMolkky() {
 
   let teamMessage: TeamMessage = getTeamMessage();
 
+  const activeModal = winner
+    ? { team: winner, type: 'win' as const }
+    : loser
+      ? { team: loser, type: 'lose' as const }
+      : null;
+
   return (
     <main className="min-h-screen flex flex-col items-center pt-8 pb-4 px-4 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <div className="w-full max-w-md flex flex-col items-center gap-4 text-gray-800 dark:text-gray-100">
@@ -106,43 +117,19 @@ export default function CalculationMolkky() {
           </div>
         </div>
       </div>
-      {winner && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white dark:bg-black p-8 rounded-xl shadow-2xl text-center space-y-4">
-            <h2 className="text-2xl font-bold">
-              {winner === 'A' ? '🟥 チームA' : '🟦 チームB'} の勝利！
-            </h2>
-            {againButton()}
-          </div>
-        </div>
-      )}
-      {loser && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-          <div className="bg-white dark:bg-black p-8 rounded-xl shadow-2xl text-center space-y-4">
-            <h2 className="text-2xl font-bold">
-              {loser === 'A' ? '🟥 チームA' : '🟦 チームB'} の敗北…
-            </h2>
-            {againButton()}
-          </div>
-        </div>
+      {activeModal && (
+        <GameResultModal
+          team={activeModal.team}
+          type={activeModal.type}
+          onReset={() => {
+            setWinner(null);
+            setLoser(null);
+            setHistory([initialState]);
+          }}
+        />
       )}
     </main>
   );
-
-  function againButton() {
-    return (
-      <button
-        className="items-center justify-center h-16 w-24 text-lg font-bold bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl active:scale-95 transition-all border border-green-100 dark:border-green-800"
-        onClick={() => {
-          setWinner(null);
-          setLoser(null);
-          setHistory([initialState]);
-        }}
-      >
-        もう一度
-      </button>
-    );
-  }
 
   function displayTeamScore(team: Team) {
     const foulCount = team === 'A' ? current.foulA : current.foulB;
@@ -182,5 +169,25 @@ export default function CalculationMolkky() {
         break;
     }
     return teamMessage;
+  }
+
+  function GameResultModal({ team, type, onReset }: GameResultModalProps) {
+    const isWin = type === 'win';
+
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+        <div className="bg-white dark:bg-black p-8 rounded-xl shadow-2xl text-center space-y-4">
+          <h2 className="text-2xl font-bold">
+            {team === 'A' ? '🟥 チームA' : '🟦 チームB'} の{isWin ? '勝利！' : '敗北…'}
+          </h2>
+          <button
+            onClick={onReset}
+            className="items-center justify-center h-12 w-24 text-lg font-bold bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl active:scale-95 transition-all border border-green-100 dark:border-green-800"
+          >
+            もう一度
+          </button>
+        </div>
+      </div>
+    );
   }
 }
