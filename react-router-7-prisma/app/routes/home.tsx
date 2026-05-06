@@ -17,7 +17,8 @@ export default function Home() {
             <h1 className="text-xl font-bold">モルック・スコア計算</h1>
           </header>
 
-          <Link to="two_team">2チームで遊ぶ</Link>
+          <Link to="/two_team">2チームで遊ぶ</Link>
+          <Link to="/three_team">3チームで遊ぶ</Link>
         </div>
       </main>
     </>
