@@ -16,9 +16,21 @@ export default function Home() {
           <header className="w-full flex flex-col items-center py-2 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
             <h1 className="text-xl font-bold">モルック・スコア計算</h1>
           </header>
+          <div className="w-full flex flex-col items-center gap-8 text-gray-800 dark:text-gray-100">
+            <Link
+              to="/two_team"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 inline-block text-center"
+            >
+              2チームで遊ぶ
+            </Link>
 
-          <Link to="/two_team">2チームで遊ぶ</Link>
-          <Link to="/three_team">3チームで遊ぶ</Link>
+            <Link
+              to="/three_team"
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 inline-block text-center"
+            >
+              3チームで遊ぶ
+            </Link>
+          </div>
         </div>
       </main>
     </>
