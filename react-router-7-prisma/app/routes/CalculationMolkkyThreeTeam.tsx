@@ -40,6 +40,8 @@ export default function CalculationMolkkyThreeTeam() {
       if (current.scoreA + point == 50) {
         setWinner('A');
       } else if (current.foulA == 2 && point == 0) {
+        if (loser == 'B') setWinner('C');
+        else if (loser == 'C') setWinner('B');
         setLoser('A');
         setLoserFlag(true);
         setHistory(prev => [
@@ -61,6 +63,8 @@ export default function CalculationMolkkyThreeTeam() {
       if (current.scoreB + point == 50) {
         setWinner('B');
       } else if (current.foulB == 2 && point == 0) {
+        if (loser == 'C') setWinner('A');
+        else if (loser == 'A') setWinner('C');
         setLoser('B');
         setLoserFlag(true);
         setHistory(prev => [
@@ -82,6 +86,8 @@ export default function CalculationMolkkyThreeTeam() {
       if (current.scoreC + point == 50) {
         setWinner('C');
       } else if (current.foulC == 2 && point == 0) {
+        if (loser == 'A') setWinner('B');
+        else if (loser == 'B') setWinner('A');
         setLoser('C');
         setLoserFlag(true);
         setHistory(prev => [

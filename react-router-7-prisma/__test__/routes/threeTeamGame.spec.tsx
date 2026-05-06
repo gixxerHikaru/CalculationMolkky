@@ -433,5 +433,34 @@ describe('スコアの更新', () => {
       await playAndAssert(2, 4, 0, 2);
       expect(await screen.findByText('🟦チームBの番です'));
     });
+
+    test('2チームが敗北している場合は、残った1チームの勝利が表示される', async () => {
+      render(<Stub initialEntries={['/three_team']} />);
+      const foulButton = await screen.findByRole('button', { name: 'ファウル' });
+
+      await playAndAssert(1, 1, 0, 0);
+      await user.click(foulButton);
+      await playAndAssert(1, 1, 0, 1);
+      await playAndAssert(1, 2, 0, 1);
+      await user.click(foulButton);
+      await playAndAssert(1, 2, 0, 2);
+      await playAndAssert(1, 3, 0, 2);
+      await user.click(foulButton);
+
+      const loseMsgB = await screen.findByText('🟦 チームB の敗北…');
+      assert.exists(loseMsgB);
+      const continueButtonB = await screen.findByRole('button', { name: '他のチームのために継続' });
+      await user.click(continueButtonB);
+
+      await user.click(foulButton);
+      await playAndAssert(1, 4, 0, 2);
+      await user.click(foulButton);
+      await playAndAssert(1, 5, 0, 2);
+      await user.click(foulButton);
+
+      expect(screen.queryByText('🟩 チームC の敗北…')).toBeNull();
+      const winMsg = await screen.findByText('🟥 チームA の勝利！');
+      assert.exists(winMsg);
+    });
   });
 });
