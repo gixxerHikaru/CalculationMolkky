@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-type Team = 'A' | 'B';
+type Team = 'A' | 'B' | 'C';
 type TeamMessage = '🟥チームAの番です' | '🟦チームBの番です';
 type State = {
   scoreA: number;
@@ -76,6 +76,50 @@ export default function CalculationMolkkyThreeTeam() {
           <h1 className="text-xl font-bold">モルック・スコア計算(3チーム)</h1>
         </header>
       </div>
+      <div className="w-full flex items-stretch bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
+        {displayTeamScore('A')}
+        <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-2 text-[8px] font-bold text-gray-400 border-x border-gray-100 dark:border-gray-700">
+          VS
+        </div>
+        {displayTeamScore('B')}
+        <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-2 text-[8px] font-bold text-gray-400 border-x border-gray-100 dark:border-gray-700">
+          VS
+        </div>
+        {displayTeamScore('C')}
+      </div>
+
+      <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
+        <div className="w-full p-2 bg-white dark:bg-gray-800 rounded-l">
+          <p className="text-sm">{teamMessage}</p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          {[...Array(12)].map((_, i) => (
+            <button
+              key={i + 1}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-300"
+              onClick={() => {
+                handleScore(i + 1);
+              }}
+            >
+              {i + 1}点
+            </button>
+          ))}
+          <div />
+          <button
+            className="flex items-center justify-center h-16 text-lg font-bold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl active:scale-95 transition-all border border-red-100 dark:border-red-800"
+            onClick={() => handleScore(0)}
+          >
+            ファウル
+          </button>
+          <button
+            className="flex items-center justify-center h-16 text-lg font-bold bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl active:scale-95 transition-all border border-amber-100 dark:border-amber-800"
+            onClick={() => handleBack()}
+          >
+            戻る
+          </button>
+        </div>
+      </div>
     </main>
   );
 
@@ -89,7 +133,7 @@ export default function CalculationMolkkyThreeTeam() {
       >
         <div className="flex flex-col items-center gap-1">
           <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
-            TEAM {team == 'A' ? 'A🟥' : 'B🟦'}
+            TEAM {team == 'A' ? 'A🟥' : team == 'B' ? 'B🟦' : 'C🟩'}
           </span>
           <div className="flex items-center gap-2">
             {team == 'A' ? `${current.scoreA}点` : `${current.scoreB}点`}

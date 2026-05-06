@@ -19,18 +19,21 @@ describe('初期表示', () => {
     expect(screen.getByText('モルック・スコア計算(3チーム)'));
   });
 
-  test.skip('2チームの合計得点が見える', () => {
+  test('3チームの合計得点が見える', () => {
     render(<Stub initialEntries={['/three_team']} />);
     expect(screen.getByText('TEAM A🟥'));
     const sectionA = screen.getByText('TEAM A🟥').closest('div');
     expect(sectionA).toHaveTextContent('0点');
-    expect(screen.getByText('VS'));
     expect(screen.getByText('TEAM B🟦'));
     const sectionB = screen.getByText('TEAM B🟦').closest('div');
     expect(sectionB).toHaveTextContent('0点');
+    expect(screen.getByText('TEAM C🟩'));
+    const sectionC = screen.getByText('TEAM C🟩').closest('div');
+    expect(sectionC).toHaveTextContent('0点');
+    expect(screen.getAllByText('VS')[0]).toBeInTheDocument();
   });
 
-  test.skip('1~12のスコアボタンとFoulボタンが見える', () => {
+  test('1~12のスコアボタンとFoulボタンが見える', () => {
     render(<Stub initialEntries={['/three_team']} />);
     expect(screen.getByRole('button', { name: '1点' }));
     expect(screen.getByRole('button', { name: '2点' }));
@@ -48,7 +51,7 @@ describe('初期表示', () => {
     expect(screen.getByRole('button', { name: '戻る' }));
   });
 
-  test.skip('チームAの番ですが見える', () => {
+  test('チームAの番ですが見える', () => {
     render(<Stub initialEntries={['/three_team']} />);
     expect(screen.getByText('🟥チームAの番です'));
   });
