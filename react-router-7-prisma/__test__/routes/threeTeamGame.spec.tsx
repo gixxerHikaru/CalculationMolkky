@@ -353,7 +353,7 @@ describe('スコアの更新', () => {
       const loseMsg = await screen.findByText('🟩 チームC の敗北…');
       assert.exists(loseMsg);
     });
-    test('モーダルには「もう一度」ボタンがあり、押すと初期状態からゲームができる画面になる', async () => {
+    test('モーダルには「他のチームのために継続」ボタンがあり、押すと次のチームからゲームができる画面になる', async () => {
       render(<Stub initialEntries={['/three_team']} />);
       const foulButton = await screen.findByRole('button', { name: 'ファウル' });
 
@@ -369,13 +369,69 @@ describe('スコアの更新', () => {
       const loseMsg = await screen.findByText('🟦 チームB の敗北…');
       assert.exists(loseMsg);
 
-      const resetButton = await screen.findByRole('button', { name: 'もう一度' });
+      const resetButton = await screen.findByRole('button', { name: '他のチームのために継続' });
       await user.click(resetButton);
 
-      expect(screen.getByText('🟥チームAの番です'));
-      assertTeamState('A', 0, 0);
-      assertTeamState('B', 0, 0);
-      assertTeamState('C', 0, 0);
+      expect(screen.getByText('🟩チームCの番です'));
+      assertTeamState('A', 3, 0);
+      assertTeamState('B', 0, 3);
+      assertTeamState('C', 2, 0);
+    });
+
+    test('敗北したチームは番が来てもスキップされる', async () => {
+      render(<Stub initialEntries={['/three_team']} />);
+      const foulButton = await screen.findByRole('button', { name: 'ファウル' });
+
+      await playAndAssert(1, 1, 0, 0);
+      await user.click(foulButton);
+      await playAndAssert(1, 1, 0, 1);
+      await playAndAssert(1, 2, 0, 1);
+      await user.click(foulButton);
+      await playAndAssert(1, 2, 0, 2);
+      await playAndAssert(1, 3, 0, 2);
+      await user.click(foulButton);
+
+      const loseMsg = await screen.findByText('🟦 チームB の敗北…');
+      assert.exists(loseMsg);
+      const continueButton = await screen.findByRole('button', { name: '他のチームのために継続' });
+      await user.click(continueButton);
+      expect(screen.queryByText('🟦 チームB の敗北…')).toBeNull();
+
+      expect(await screen.findByText('🟩チームCの番です'));
+      await playAndAssert(1, 3, 0, 3);
+      expect(await screen.findByText('🟥チームAの番です'));
+      await playAndAssert(1, 4, 0, 3);
+
+      expect(screen.queryByText('🟦チームBの番です')).toBeNull();
+      expect(await screen.findByText('🟩チームCの番です'));
+    });
+
+    test('敗北したチームは戻るボタンを押されて敗北状態じゃなくなれば、番が来てもスキップされない', async () => {
+      render(<Stub initialEntries={['/three_team']} />);
+      const foulButton = await screen.findByRole('button', { name: 'ファウル' });
+
+      await playAndAssert(1, 1, 0, 0);
+      await user.click(foulButton);
+      await playAndAssert(1, 1, 0, 1);
+      await playAndAssert(1, 2, 0, 1);
+      await user.click(foulButton);
+      await playAndAssert(1, 2, 0, 2);
+      await playAndAssert(1, 3, 0, 2);
+      await user.click(foulButton);
+
+      const loseMsg = await screen.findByText('🟦 チームB の敗北…');
+      assert.exists(loseMsg);
+      const continueButton = await screen.findByRole('button', { name: '他のチームのために継続' });
+      await user.click(continueButton);
+
+      expect(await screen.findByText('🟩チームCの番です'));
+      await clickBackAndAssert(3, 0, 2);
+      expect(await screen.findByText('🟦チームBの番です'));
+      await clickBackAndAssert(2, 0, 2);
+
+      expect(await screen.findByText('🟥チームAの番です'));
+      await playAndAssert(2, 4, 0, 2);
+      expect(await screen.findByText('🟦チームBの番です'));
     });
   });
 });

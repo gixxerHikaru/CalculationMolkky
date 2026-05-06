@@ -44,3 +44,20 @@ test('3チームで遊ぶのリンクが見えて、リンクを押すと2チー
   await userEvent.click(link);
   expect(await screen.findByText('モルック・スコア計算(3チーム)')).toBeInTheDocument();
 });
+
+const StubWithThreeTeamLink = createRoutesStub([
+  {
+    path: '/',
+    Component: Home,
+    children: [
+      {
+        path: 'calculation_molkky',
+        Component: CalculationMolkky,
+      },
+      {
+        path: 'calculation_molkky/three_team',
+        Component: () => <div>モルック・スコア計算(3チーム)</div>,
+      },
+    ],
+  },
+]);

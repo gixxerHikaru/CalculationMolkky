@@ -9,6 +9,7 @@ type State = {
   foulB: number;
   scoreC: number;
   foulC: number;
+  loser: Team | null;
   turn: 'A' | 'B' | 'C';
 };
 interface GameResultModalProps {
@@ -24,15 +25,82 @@ const initialState: State = {
   foulB: 0,
   scoreC: 0,
   foulC: 0,
+  loser: null,
   turn: 'A',
 };
 
 export default function CalculationMolkkyThreeTeam() {
   const [winner, setWinner] = useState<Team | null>(null);
   const [loser, setLoser] = useState<Team | null>(null);
+  const [loserFlag, setLoserFlag] = useState<Boolean>(false);
   const [history, setHistory] = useState<State[]>([initialState]);
   const current = history[history.length - 1];
   const handleScore = (point: number) => {
+    if (current.turn === 'A') {
+      if (current.scoreA + point == 50) {
+        setWinner('A');
+      } else if (current.foulA == 2 && point == 0) {
+        setLoser('A');
+        setLoserFlag(true);
+        setHistory(prev => [
+          ...prev,
+          {
+            scoreA: current.scoreA,
+            foulA: current.foulA + 1,
+            scoreB: current.scoreB,
+            foulB: current.foulB,
+            scoreC: current.scoreC,
+            foulC: current.foulC,
+            loser: 'A',
+            turn: 'B',
+          },
+        ]);
+        return;
+      }
+    } else if (current.turn === 'B') {
+      if (current.scoreB + point == 50) {
+        setWinner('B');
+      } else if (current.foulB == 2 && point == 0) {
+        setLoser('B');
+        setLoserFlag(true);
+        setHistory(prev => [
+          ...prev,
+          {
+            scoreA: current.scoreA,
+            foulA: current.foulA,
+            scoreB: current.scoreB,
+            foulB: current.foulB + 1,
+            scoreC: current.scoreC,
+            foulC: current.foulC,
+            loser: 'B',
+            turn: 'C',
+          },
+        ]);
+        return;
+      }
+    } else if (current.turn === 'C') {
+      if (current.scoreC + point == 50) {
+        setWinner('C');
+      } else if (current.foulC == 2 && point == 0) {
+        setLoser('C');
+        setLoserFlag(true);
+        setHistory(prev => [
+          ...prev,
+          {
+            scoreA: current.scoreA,
+            foulA: current.foulA,
+            scoreB: current.scoreB,
+            foulB: current.foulB,
+            scoreC: current.scoreC,
+            foulC: current.foulC + 1,
+            loser: 'C',
+            turn: 'A',
+          },
+        ]);
+        return;
+      }
+    }
+
     setHistory(prev => [
       ...prev,
       current.turn === 'A'
@@ -43,7 +111,8 @@ export default function CalculationMolkkyThreeTeam() {
             foulB: current.foulB,
             scoreC: current.scoreC,
             foulC: current.foulC,
-            turn: 'B',
+            loser: null,
+            turn: loser == 'B' ? 'C' : 'B',
           }
         : current.turn === 'B'
           ? {
@@ -53,7 +122,8 @@ export default function CalculationMolkkyThreeTeam() {
               foulB: point == 0 ? current.foulB + 1 : 0,
               scoreC: current.scoreC,
               foulC: current.foulC,
-              turn: 'C',
+              loser: null,
+              turn: loser == 'C' ? 'A' : 'C',
             }
           : {
               scoreA: current.scoreA,
@@ -62,31 +132,16 @@ export default function CalculationMolkkyThreeTeam() {
               foulB: current.foulB,
               scoreC: current.scoreC + point > 50 ? 25 : current.scoreC + point,
               foulC: point == 0 ? current.foulC + 1 : 0,
-              turn: 'A',
+              loser: null,
+              turn: loser == 'A' ? 'B' : 'A',
             },
     ]);
-    if (current.turn === 'A') {
-      if (current.scoreA + point == 50) {
-        setWinner('A');
-      } else if (current.foulA == 2 && point == 0) {
-        setLoser('A');
-      }
-    } else if (current.turn === 'B') {
-      if (current.scoreB + point == 50) {
-        setWinner('B');
-      } else if (current.foulB == 2 && point == 0) {
-        setLoser('B');
-      }
-    } else if (current.turn === 'C') {
-      if (current.scoreC + point == 50) {
-        setWinner('C');
-      } else if (current.foulC == 2 && point == 0) {
-        setLoser('C');
-      }
-    }
   };
   const handleBack = () => {
     if (history.length > 1) {
+      if (history[history.length - 1].loser) {
+        setLoser(null);
+      }
       setHistory(prev => prev.slice(0, -1));
     }
   };
@@ -95,7 +150,7 @@ export default function CalculationMolkkyThreeTeam() {
 
   const activeModal = winner
     ? { team: winner, type: 'win' as const }
-    : loser
+    : loserFlag && loser
       ? { team: loser, type: 'lose' as const }
       : null;
 
@@ -225,12 +280,23 @@ export default function CalculationMolkkyThreeTeam() {
             {team === 'A' ? '🟥 チームA' : team === 'B' ? '🟦 チームB' : '🟩 チームC'} の
             {isWin ? '勝利！' : '敗北…'}
           </h2>
-          <button
-            onClick={onReset}
-            className="items-center justify-center h-12 w-24 text-lg font-bold bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl active:scale-95 transition-all border border-green-100 dark:border-green-800"
-          >
-            もう一度
-          </button>
+          {isWin ? (
+            <button
+              onClick={onReset}
+              className="items-center justify-center h-12 w-24 text-lg font-bold bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl active:scale-95 transition-all border border-green-100 dark:border-green-800"
+            >
+              もう一度
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setLoserFlag(false);
+              }}
+              className="items-center justify-center h-12  text-lg font-bold bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl active:scale-95 transition-all border border-green-100 dark:border-green-800"
+            >
+              他のチームのために継続
+            </button>
+          )}
         </div>
       </div>
     );
