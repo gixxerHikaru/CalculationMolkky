@@ -77,6 +77,12 @@ export default function CalculationMolkkyThreeTeam() {
       } else if (current.foulB == 2 && point == 0) {
         setLoser('B');
       }
+    } else if (current.turn === 'C') {
+      if (current.scoreC + point == 50) {
+        setWinner('C');
+      } else if (current.foulC == 2 && point == 0) {
+        setLoser('C');
+      }
     }
   };
   const handleBack = () => {
@@ -144,6 +150,17 @@ export default function CalculationMolkkyThreeTeam() {
           </button>
         </div>
       </div>
+      {activeModal && (
+        <GameResultModal
+          team={activeModal.team}
+          type={activeModal.type}
+          onReset={() => {
+            setWinner(null);
+            setLoser(null);
+            setHistory([initialState]);
+          }}
+        />
+      )}
     </main>
   );
 
@@ -151,7 +168,7 @@ export default function CalculationMolkkyThreeTeam() {
     const foulCount = team === 'A' ? current.foulA : team === 'B' ? current.foulB : current.foulC;
     return (
       <div
-        id={team == 'A' ? 'team-a-box' : 'team-b-box'}
+        id={team == 'A' ? 'team-a-box' : team == 'B' ? 'team-b-box' : 'team-c-box'}
         data-testid={team == 'A' ? 'team-a-box' : team == 'B' ? 'team-b-box' : 'team-c-box'}
         className={`flex-1 p-4 transition-all ${current.turn === team ? ' bg-yellow-100 dark:bg-yellow-900/20 ring-2 ring-inset ring-yellow-500' : ''}`}
       >
@@ -201,7 +218,8 @@ export default function CalculationMolkkyThreeTeam() {
       <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
         <div className="bg-white dark:bg-black p-8 rounded-xl shadow-2xl text-center space-y-4">
           <h2 className="text-2xl font-bold">
-            {team === 'A' ? '🟥 チームA' : '🟦 チームB'} の{isWin ? '勝利！' : '敗北…'}
+            {team === 'A' ? '🟥 チームA' : team === 'B' ? '🟦 チームB' : '🟩 チームC'} の
+            {isWin ? '勝利！' : '敗北…'}
           </h2>
           <button
             onClick={onReset}
