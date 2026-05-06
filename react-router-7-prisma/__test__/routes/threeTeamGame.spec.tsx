@@ -3,7 +3,8 @@ import { assert, expect, test } from 'vitest';
 import { createRoutesStub } from 'react-router';
 import { describe } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import CalculationMolkkyThreeTeam from '~/routes/CalculationMolkkyThreeTeam';
+import CalculationMolkkyThreeTeam, { type Team } from '~/routes/CalculationMolkkyThreeTeam';
+import type { as } from 'node_modules/react-router/dist/development/routeModules-BmVo7q9e';
 
 const Stub = createRoutesStub([
   {
@@ -58,21 +59,24 @@ describe('初期表示', () => {
 });
 
 describe('スコアの更新', () => {
-  async function assertTeamScore(team: 'A' | 'B', expectedScore: number) {
-    const teamBox = await screen.findByTestId(team === 'A' ? 'team-a-box' : 'team-b-box');
+  async function assertTeamScore(team: Team, expectedScore: number) {
+    const teamBox = await screen.findByTestId(
+      team === 'A' ? 'team-a-box' : team === 'B' ? 'team-b-box' : 'team-c-box'
+    );
 
     const scoreElement = await within(teamBox).findByText(new RegExp(`${expectedScore}点`));
 
     assert.exists(scoreElement, `チーム${team}のスコアが${expectedScore}点であること`);
   }
 
-  async function assertState(expectedA: number, expectedB: number) {
+  async function assertState(expectedA: number, expectedB: number, expectedC: number) {
     await assertTeamScore('A', expectedA);
     await assertTeamScore('B', expectedB);
+    await assertTeamScore('C', expectedC);
   }
 
-  async function assertTeamState(team: 'A' | 'B', expectedScore: number, expectedFoul: number) {
-    const teamId = team === 'A' ? 'team-a-box' : 'team-b-box';
+  async function assertTeamState(team: Team, expectedScore: number, expectedFoul: number) {
+    const teamId = team === 'A' ? 'team-a-box' : team === 'B' ? 'team-b-box' : 'team-c-box';
     const teamBox = await screen.findByTestId(teamId);
 
     const scoreEl = await within(teamBox).findByText(new RegExp(`${expectedScore}点`));
@@ -88,42 +92,41 @@ describe('スコアの更新', () => {
 
   const user = userEvent.setup();
 
-  async function playAndAssert(point: number, expectedA: number, expectedB: number) {
+  async function playAndAssert(
+    point: number,
+    expectedA: number,
+    expectedB: number,
+    expectedC: number
+  ) {
     const button = await screen.findByRole('button', { name: `${point}点` });
     await user.click(button);
-    await assertState(expectedA, expectedB);
+    await assertState(expectedA, expectedB, expectedC);
   }
 
-  async function clickBackAndAssert(expectedA: number, expectedB: number) {
+  async function clickBackAndAssert(expectedA: number, expectedB: number, expectedC: number) {
     const button = await screen.findByRole('button', { name: '戻る' });
     await user.click(button);
-    await assertState(expectedA, expectedB);
+    await assertState(expectedA, expectedB, expectedC);
   }
 
-  test.skip('チームAとチームBが交互に得点し、スコアと攻撃権が正しく遷移する', async () => {
+  test('チームA→B→Cの順番で得点し、スコアと攻撃権が正しく遷移する', async () => {
     render(<Stub initialEntries={['/three_team']} />);
 
     const steps = [
-      { point: 12, a: 12, b: 0 },
-      { point: 11, a: 12, b: 11 },
-      { point: 10, a: 22, b: 11 },
-      { point: 9, a: 22, b: 20 },
-      { point: 8, a: 30, b: 20 },
-      { point: 7, a: 30, b: 27 },
-      { point: 6, a: 36, b: 27 },
-      { point: 5, a: 36, b: 32 },
-      { point: 4, a: 40, b: 32 },
-      { point: 3, a: 40, b: 35 },
-      { point: 2, a: 42, b: 35 },
-      { point: 1, a: 42, b: 36 },
+      { point: 12, a: 12, b: 0, c: 0 },
+      { point: 11, a: 12, b: 11, c: 0 },
+      { point: 10, a: 12, b: 11, c: 10 },
+      { point: 9, a: 21, b: 11, c: 10 },
+      { point: 8, a: 21, b: 19, c: 10 },
+      { point: 7, a: 21, b: 19, c: 17 },
     ];
 
     for (const step of steps) {
-      await playAndAssert(step.point, step.a, step.b);
+      await playAndAssert(step.point, step.a, step.b, step.c);
     }
   });
 
-  test.skip('番手のチームの合計スコアにハイライトが当たり、そうでないチームにはつかない', async () => {
+  test('番手のチームの合計スコアにハイライトが当たり、そうでないチームにはつかない', async () => {
     render(<Stub initialEntries={['/three_team']} />);
 
     await waitFor(async () => {
@@ -131,7 +134,7 @@ describe('スコアの更新', () => {
       expect(teamABox).toHaveClass('bg-yellow-100');
     });
 
-    await playAndAssert(5, 5, 0);
+    await playAndAssert(5, 5, 0, 0);
 
     await waitFor(async () => {
       const teamBBox = await screen.findByTestId('team-b-box');
@@ -139,19 +142,25 @@ describe('スコアの更新', () => {
     });
   });
 
-  test.skip('ファウルボタンを押すと、得点は加算されずに攻撃権が移り、合計スコアの下にファウル回数が表示される', async () => {
+  test('ファウルボタンを押すと、得点は加算されずに攻撃権が移り、合計スコアの下にファウル回数が表示される', async () => {
     render(<Stub initialEntries={['/three_team']} />);
 
     const foulButton = await screen.findByRole('button', { name: 'ファウル' });
 
     await user.click(foulButton);
-
     expect(await screen.findByText('🟦チームBの番です')).toBeInTheDocument();
     await assertTeamState('A', 0, 1);
     await assertTeamState('B', 0, 0);
+    await assertTeamState('C', 0, 0);
+
+    await user.click(foulButton);
+    expect(await screen.findByText('🟩チームCの番です')).toBeInTheDocument();
+    await assertTeamState('A', 0, 1);
+    await assertTeamState('B', 0, 1);
+    await assertTeamState('C', 0, 0);
   });
 
-  test.skip('ファウル回数が表示されている状態で、得点をすると得点した側のファウル回数がリセットされる', async () => {
+  test('ファウル回数が表示されている状態で、得点をすると得点した側のファウル回数がリセットされる', async () => {
     render(<Stub initialEntries={['/three_team']} />);
 
     const foulButton = await screen.findByRole('button', { name: 'ファウル' });
@@ -161,44 +170,63 @@ describe('スコアの更新', () => {
 
     assert.isOk(await screen.findByText('🟦チームBの番です'));
     await user.click(foulButton);
-
     await assertTeamState('A', 0, 1);
     await assertTeamState('B', 0, 1);
+    await assertTeamState('C', 0, 0);
+
+    assert.isOk(await screen.findByText('🟩チームCの番です'));
+    await user.click(foulButton);
+    await assertTeamState('A', 0, 1);
+    await assertTeamState('B', 0, 1);
+    await assertTeamState('C', 0, 1);
 
     assert.isOk(await screen.findByText('🟥チームAの番です'));
-    await playAndAssert(5, 5, 0);
-
+    await playAndAssert(5, 5, 0, 0);
     await assertTeamState('A', 5, 0);
     await assertTeamState('B', 0, 1);
+    await assertTeamState('C', 0, 1);
+
+    assert.isOk(await screen.findByText('🟦チームBの番です'));
   });
 
-  test.skip('戻るボタンを押すと、前の状態に戻る', async () => {
+  test('戻るボタンを押すと、前の状態に戻る', async () => {
     render(<Stub initialEntries={['/three_team']} />);
-    await playAndAssert(5, 5, 0);
-    await playAndAssert(3, 5, 3);
 
-    await clickBackAndAssert(5, 0);
-    await clickBackAndAssert(0, 0);
+    const firstStep = [5, 0, 0] as const;
+    await playAndAssert(5, ...firstStep);
+    const secondStep = [5, 3, 0] as const;
+    await playAndAssert(3, ...secondStep);
+    const thirdStep = [5, 3, 1] as const;
+    await playAndAssert(1, ...thirdStep);
+
+    await clickBackAndAssert(...secondStep);
+    await clickBackAndAssert(...firstStep);
+    await clickBackAndAssert(0, 0, 0);
   });
 
-  test.skip('50点を超えると、超えた側のスコアが25点にリセットされ、攻撃権が移る', async () => {
+  test('50点を超えると、超えた側のスコアが25点にリセットされ、攻撃権が移る', async () => {
     render(<Stub initialEntries={['/three_team']} />);
     const steps = [
-      { point: 12, a: 12, b: 0 },
-      { point: 12, a: 12, b: 12 },
-      { point: 12, a: 24, b: 12 },
-      { point: 12, a: 24, b: 24 },
-      { point: 12, a: 36, b: 24 },
-      { point: 12, a: 36, b: 36 },
-      { point: 12, a: 48, b: 36 },
-      { point: 12, a: 48, b: 48 },
+      { point: 12, a: 12, b: 0, c: 0 },
+      { point: 12, a: 12, b: 12, c: 0 },
+      { point: 12, a: 12, b: 12, c: 12 },
+      { point: 12, a: 24, b: 12, c: 12 },
+      { point: 12, a: 24, b: 24, c: 12 },
+      { point: 12, a: 24, b: 24, c: 24 },
+      { point: 12, a: 36, b: 24, c: 24 },
+      { point: 12, a: 36, b: 36, c: 24 },
+      { point: 12, a: 36, b: 36, c: 36 },
+      { point: 12, a: 48, b: 36, c: 36 },
+      { point: 12, a: 48, b: 48, c: 36 },
+      { point: 12, a: 48, b: 48, c: 48 },
     ];
     for (const step of steps) {
-      await playAndAssert(step.point, step.a, step.b);
+      await playAndAssert(step.point, step.a, step.b, step.c);
     }
 
-    await playAndAssert(12, 25, 48);
-    await playAndAssert(12, 25, 25);
+    await playAndAssert(12, 25, 48, 48);
+    await playAndAssert(12, 25, 25, 48);
+    await playAndAssert(12, 25, 25, 25);
   });
 
   describe('勝利条件', () => {

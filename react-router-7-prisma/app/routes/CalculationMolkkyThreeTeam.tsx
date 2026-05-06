@@ -1,13 +1,15 @@
 import { useState } from 'react';
 
-type Team = 'A' | 'B' | 'C';
-type TeamMessage = '🟥チームAの番です' | '🟦チームBの番です';
+export type Team = 'A' | 'B' | 'C';
+type TeamMessage = '🟥チームAの番です' | '🟦チームBの番です' | '🟩チームCの番です';
 type State = {
   scoreA: number;
   foulA: number;
   scoreB: number;
   foulB: number;
-  turn: 'A' | 'B';
+  scoreC: number;
+  foulC: number;
+  turn: 'A' | 'B' | 'C';
 };
 interface GameResultModalProps {
   team: Team;
@@ -15,7 +17,15 @@ interface GameResultModalProps {
   onReset: () => void;
 }
 
-const initialState: State = { scoreA: 0, foulA: 0, scoreB: 0, foulB: 0, turn: 'A' };
+const initialState: State = {
+  scoreA: 0,
+  foulA: 0,
+  scoreB: 0,
+  foulB: 0,
+  scoreC: 0,
+  foulC: 0,
+  turn: 'A',
+};
 
 export default function CalculationMolkkyThreeTeam() {
   const [winner, setWinner] = useState<Team | null>(null);
@@ -31,15 +41,29 @@ export default function CalculationMolkkyThreeTeam() {
             foulA: point == 0 ? current.foulA + 1 : 0,
             scoreB: current.scoreB,
             foulB: current.foulB,
+            scoreC: current.scoreC,
+            foulC: current.foulC,
             turn: 'B',
           }
-        : {
-            scoreA: current.scoreA,
-            foulA: current.foulA,
-            scoreB: current.scoreB + point > 50 ? 25 : current.scoreB + point,
-            foulB: point == 0 ? current.foulB + 1 : 0,
-            turn: 'A',
-          },
+        : current.turn === 'B'
+          ? {
+              scoreA: current.scoreA,
+              foulA: current.foulA,
+              scoreB: current.scoreB + point > 50 ? 25 : current.scoreB + point,
+              foulB: point == 0 ? current.foulB + 1 : 0,
+              scoreC: current.scoreC,
+              foulC: current.foulC,
+              turn: 'C',
+            }
+          : {
+              scoreA: current.scoreA,
+              foulA: current.foulA,
+              scoreB: current.scoreB,
+              foulB: current.foulB,
+              scoreC: current.scoreC + point > 50 ? 25 : current.scoreC + point,
+              foulC: point == 0 ? current.foulC + 1 : 0,
+              turn: 'A',
+            },
     ]);
     if (current.turn === 'A') {
       if (current.scoreA + point == 50) {
@@ -124,11 +148,11 @@ export default function CalculationMolkkyThreeTeam() {
   );
 
   function displayTeamScore(team: Team) {
-    const foulCount = team === 'A' ? current.foulA : current.foulB;
+    const foulCount = team === 'A' ? current.foulA : team === 'B' ? current.foulB : current.foulC;
     return (
       <div
         id={team == 'A' ? 'team-a-box' : 'team-b-box'}
-        data-testid={team == 'A' ? 'team-a-box' : 'team-b-box'}
+        data-testid={team == 'A' ? 'team-a-box' : team == 'B' ? 'team-b-box' : 'team-c-box'}
         className={`flex-1 p-4 transition-all ${current.turn === team ? ' bg-yellow-100 dark:bg-yellow-900/20 ring-2 ring-inset ring-yellow-500' : ''}`}
       >
         <div className="flex flex-col items-center gap-1">
@@ -136,7 +160,11 @@ export default function CalculationMolkkyThreeTeam() {
             TEAM {team == 'A' ? 'A🟥' : team == 'B' ? 'B🟦' : 'C🟩'}
           </span>
           <div className="flex items-center gap-2">
-            {team == 'A' ? `${current.scoreA}点` : `${current.scoreB}点`}
+            {team == 'A'
+              ? `${current.scoreA}点`
+              : team == 'B'
+                ? `${current.scoreB}点`
+                : `${current.scoreC}点`}
           </div>
           {foulCount > 0 && (
             <div className="mt-1 text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -158,6 +186,9 @@ export default function CalculationMolkkyThreeTeam() {
         break;
       case 'B':
         teamMessage = '🟦チームBの番です';
+        break;
+      case 'C':
+        teamMessage = '🟩チームCの番です';
         break;
     }
     return teamMessage;
