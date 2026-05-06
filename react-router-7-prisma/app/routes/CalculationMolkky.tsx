@@ -146,13 +146,15 @@ export default function CalculationMolkky() {
           <div className="flex items-center gap-2">
             {team == 'A' ? `${current.scoreA}点` : `${current.scoreB}点`}
           </div>
-          {foulCount > 0 && (
-            <div className="mt-1 text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
-              <span className="bg-red-100 dark:bg-red-900/40 px-2 py-0.5 rounded">
-                ファウル：{foulCount}
-              </span>
-            </div>
-          )}
+          <div className="h-5 flex items-center justify-center">
+            {foulCount > 0 && (
+              <div className="mt-1 text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
+                <span className="bg-red-100 dark:bg-red-900/40 px-2 py-0.5 rounded">
+                  ファウル：{foulCount}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );

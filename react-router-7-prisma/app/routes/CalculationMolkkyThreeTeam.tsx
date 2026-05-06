@@ -176,6 +176,7 @@ export default function CalculationMolkkyThreeTeam() {
           <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
             TEAM {team == 'A' ? 'A🟥' : team == 'B' ? 'B🟦' : 'C🟩'}
           </span>
+
           <div className="flex items-center gap-2">
             {team == 'A'
               ? `${current.scoreA}点`
@@ -183,13 +184,16 @@ export default function CalculationMolkkyThreeTeam() {
                 ? `${current.scoreB}点`
                 : `${current.scoreC}点`}
           </div>
-          {foulCount > 0 && (
-            <div className="mt-1 text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
-              <span className="bg-red-100 dark:bg-red-900/40 px-2 py-0.5 rounded">
-                ファウル：{foulCount}
-              </span>
-            </div>
-          )}
+
+          <div className="h-5 flex items-center justify-center">
+            {foulCount > 0 && (
+              <div className="text-[10px] font-bold text-red-600 dark:text-red-400">
+                <span className="bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded whitespace-nowrap">
+                  ファウル：{foulCount}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
