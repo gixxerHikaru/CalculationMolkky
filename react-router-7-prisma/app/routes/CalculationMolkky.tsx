@@ -146,49 +146,59 @@ export default function CalculationMolkky() {
   );
 
   function displayTeamScore(team: Team) {
-    const foulCount = team === 'A' ? current.foulA : current.foulB;
-    const points = team === 'A' ? current.pointsA : current.pointsB;
+    const isA = team === 'A';
+    const foulCount = isA ? current.foulA : current.foulB;
+    const points = isA ? current.pointsA : current.pointsB;
+    const score = isA ? current.scoreA : current.scoreB;
+    const label = isA ? 'TEAM A🟥' : 'TEAM B🟦';
+    const id = isA ? 'team-a-box' : 'team-b-box';
     const lastThree = points.slice(-3);
 
     return (
       <div
-        id={team == 'A' ? 'team-a-box' : 'team-b-box'}
-        data-testid={team == 'A' ? 'team-a-box' : 'team-b-box'}
-        className={`flex-1 p-4 transition-all ${current.turn === team ? ' bg-yellow-100 dark:bg-yellow-900/20 ring-2 ring-inset ring-yellow-500' : ''}`}
+        id={id}
+        data-testid={id}
+        className={`flex-1 p-4 transition-all ${
+          current.turn === team
+            ? 'bg-yellow-100 dark:bg-yellow-900/20 ring-2 ring-inset ring-yellow-500'
+            : ''
+        }`}
       >
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
-            TEAM {team == 'A' ? 'A🟥' : 'B🟦'}
-          </span>
-          <div className="flex flex-col items-center gap-1">
-            <div className="flex gap-1 h-8 items-center">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{label}</span>
+            <div className="text-sm font-bold text-gray-800 dark:text-gray-100">{score}点</div>
+          </div>
+
+          <div className="flex items-center justify-between min-h-[24px]">
+            <div className="flex gap-1 items-center">
               {lastThree.length > 0 ? (
                 lastThree.map((p, i) => (
                   <span
                     key={i}
-                    className={`text-sm font-bold bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded shadow-sm ${
-                      p === 'ファウル' ? 'text-red-600 dark:text-red-400' : ''
+                    className={`text-[10px] font-mono font-bold bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded shadow-sm ${
+                      p === 'ファウル'
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-gray-600 dark:text-gray-300'
                     }`}
                   >
                     {p}
                   </span>
                 ))
               ) : (
-                <span className="text-sm text-gray-400">-</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
               )}
             </div>
-            <div className="text-[10px] text-gray-400">
-              合計: {team === 'A' ? current.scoreA : current.scoreB}点
+
+            <div className="h-5 flex items-center justify-center">
+              {foulCount > 0 && (
+                <div className="text-[10px] font-bold text-red-600 dark:text-red-400">
+                  <span className="bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded whitespace-nowrap">
+                    ファウル：{foulCount}
+                  </span>
+                </div>
+              )}
             </div>
-          </div>
-          <div className="h-5 flex items-center justify-center">
-            {foulCount > 0 && (
-              <div className="mt-1 text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1">
-                <span className="bg-red-100 dark:bg-red-900/40 px-2 py-0.5 rounded">
-                  ファウル：{foulCount}
-                </span>
-              </div>
-            )}
           </div>
         </div>
       </div>
