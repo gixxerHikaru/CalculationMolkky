@@ -5,10 +5,13 @@ type TeamMessage = '🟥チームAの番です' | '🟦チームBの番です' |
 type State = {
   scoreA: number;
   foulA: number;
+  pointsA: number[];
   scoreB: number;
   foulB: number;
+  pointsB: number[];
   scoreC: number;
   foulC: number;
+  pointsC: number[];
   loser: Team | null;
   turn: 'A' | 'B' | 'C';
 };
@@ -21,10 +24,13 @@ interface GameResultModalProps {
 const initialState: State = {
   scoreA: 0,
   foulA: 0,
+  pointsA: [],
   scoreB: 0,
   foulB: 0,
+  pointsB: [],
   scoreC: 0,
   foulC: 0,
+  pointsC: [],
   loser: null,
   turn: 'A',
 };
@@ -49,10 +55,13 @@ export default function CalculationMolkkyThreeTeam() {
           {
             scoreA: current.scoreA,
             foulA: current.foulA + 1,
+            pointsA: [...current.pointsA, 0],
             scoreB: current.scoreB,
             foulB: current.foulB,
+            pointsB: current.pointsB,
             scoreC: current.scoreC,
             foulC: current.foulC,
+            pointsC: current.pointsC,
             loser: 'A',
             turn: 'B',
           },
@@ -72,10 +81,13 @@ export default function CalculationMolkkyThreeTeam() {
           {
             scoreA: current.scoreA,
             foulA: current.foulA,
+            pointsA: current.pointsA,
             scoreB: current.scoreB,
             foulB: current.foulB + 1,
+            pointsB: [...current.pointsB, 0],
             scoreC: current.scoreC,
             foulC: current.foulC,
+            pointsC: current.pointsC,
             loser: 'B',
             turn: 'C',
           },
@@ -95,10 +107,13 @@ export default function CalculationMolkkyThreeTeam() {
           {
             scoreA: current.scoreA,
             foulA: current.foulA,
+            pointsA: current.pointsA,
             scoreB: current.scoreB,
             foulB: current.foulB,
+            pointsB: current.pointsB,
             scoreC: current.scoreC,
             foulC: current.foulC + 1,
+            pointsC: [...current.pointsC, 0],
             loser: 'C',
             turn: 'A',
           },
@@ -113,10 +128,13 @@ export default function CalculationMolkkyThreeTeam() {
         ? {
             scoreA: current.scoreA + point > 50 ? 25 : current.scoreA + point,
             foulA: point == 0 ? current.foulA + 1 : 0,
+            pointsA: [...current.pointsA, point],
             scoreB: current.scoreB,
             foulB: current.foulB,
+            pointsB: current.pointsB,
             scoreC: current.scoreC,
             foulC: current.foulC,
+            pointsC: current.pointsC,
             loser: null,
             turn: loser == 'B' ? 'C' : 'B',
           }
@@ -124,20 +142,26 @@ export default function CalculationMolkkyThreeTeam() {
           ? {
               scoreA: current.scoreA,
               foulA: current.foulA,
+              pointsA: current.pointsA,
               scoreB: current.scoreB + point > 50 ? 25 : current.scoreB + point,
               foulB: point == 0 ? current.foulB + 1 : 0,
+              pointsB: [...current.pointsB, point],
               scoreC: current.scoreC,
               foulC: current.foulC,
+              pointsC: current.pointsC,
               loser: null,
               turn: loser == 'C' ? 'A' : 'C',
             }
           : {
               scoreA: current.scoreA,
               foulA: current.foulA,
+              pointsA: current.pointsA,
               scoreB: current.scoreB,
               foulB: current.foulB,
+              pointsB: current.pointsB,
               scoreC: current.scoreC + point > 50 ? 25 : current.scoreC + point,
               foulC: point == 0 ? current.foulC + 1 : 0,
+              pointsC: [...current.pointsC, point],
               loser: null,
               turn: loser == 'A' ? 'B' : 'A',
             },
@@ -167,13 +191,13 @@ export default function CalculationMolkkyThreeTeam() {
           <h1 className="text-xl font-bold">モルック・スコア計算(3チーム)</h1>
         </header>
       </div>
-      <div className="w-full flex items-stretch bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div className="w-full flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden mb-4">
         {displayTeamScore('A')}
-        <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-2 text-[8px] font-bold text-gray-400 border-x border-gray-100 dark:border-gray-700">
+        <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-1 text-[8px] font-bold text-gray-400 border-y border-gray-100 dark:border-gray-700">
           VS
         </div>
         {displayTeamScore('B')}
-        <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-2 text-[8px] font-bold text-gray-400 border-x border-gray-100 dark:border-gray-700">
+        <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-1 text-[8px] font-bold text-gray-400 border-y border-gray-100 dark:border-gray-700">
           VS
         </div>
         {displayTeamScore('C')}
@@ -226,34 +250,76 @@ export default function CalculationMolkkyThreeTeam() {
   );
 
   function displayTeamScore(team: Team) {
-    const foulCount = team === 'A' ? current.foulA : team === 'B' ? current.foulB : current.foulC;
+    // テストコードが期待する「A、B、それ以外(C)」のロジックを安全にオブジェクト化
+    const teamConfig = {
+      A: {
+        label: 'TEAM A🟥',
+        id: 'team-a-box',
+        foul: current.foulA,
+        points: current.pointsA,
+        score: current.scoreA,
+      },
+      B: {
+        label: 'TEAM B🟦',
+        id: 'team-b-box',
+        foul: current.foulB,
+        points: current.pointsB,
+        score: current.scoreB,
+      },
+      C: {
+        label: 'TEAM C🟩',
+        id: 'team-c-box',
+        foul: current.foulC,
+        points: current.pointsC,
+        score: current.scoreC,
+      },
+    };
+
+    const { label, id, foul, points, score } = teamConfig[team];
+    const lastThree = points.slice(-3);
+    const isCurrentTurn = current.turn === team;
+
     return (
       <div
-        id={team == 'A' ? 'team-a-box' : team == 'B' ? 'team-b-box' : 'team-c-box'}
-        data-testid={team == 'A' ? 'team-a-box' : team == 'B' ? 'team-b-box' : 'team-c-box'}
-        className={`flex-1 p-4 transition-all ${current.turn === team ? ' bg-yellow-100 dark:bg-yellow-900/20 ring-2 ring-inset ring-yellow-500' : ''}`}
+        id={id}
+        data-testid={id}
+        className={`flex-1 p-4 transition-all ${
+          isCurrentTurn
+            ? 'bg-yellow-100 dark:bg-yellow-900/20 ring-2 ring-inset ring-yellow-500'
+            : ''
+        }`}
       >
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
-            TEAM {team == 'A' ? 'A🟥' : team == 'B' ? 'B🟦' : 'C🟩'}
-          </span>
-
-          <div className="flex items-center gap-2">
-            {team == 'A'
-              ? `${current.scoreA}点`
-              : team == 'B'
-                ? `${current.scoreB}点`
-                : `${current.scoreC}点`}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{label}</span>
+            <div className="text-sm font-bold text-gray-800 dark:text-gray-100">{score}点</div>
           </div>
 
-          <div className="h-5 flex items-center justify-center">
-            {foulCount > 0 && (
-              <div className="text-[10px] font-bold text-red-600 dark:text-red-400">
-                <span className="bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded whitespace-nowrap">
-                  ファウル：{foulCount}
-                </span>
-              </div>
-            )}
+          <div className="flex items-center justify-between min-h-[24px]">
+            <div className="flex gap-1 items-center">
+              {lastThree.length > 0 ? (
+                lastThree.map((p, i) => (
+                  <span
+                    key={i}
+                    className="text-[10px] font-mono font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded shadow-sm"
+                  >
+                    {p}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
+              )}
+            </div>
+
+            <div className="h-5 flex items-center justify-center">
+              {foul > 0 && (
+                <div className="text-[10px] font-bold text-red-600 dark:text-red-400">
+                  <span className="bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded whitespace-nowrap">
+                    ファウル：{foul}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

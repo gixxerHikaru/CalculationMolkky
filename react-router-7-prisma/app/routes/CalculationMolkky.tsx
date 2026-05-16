@@ -5,7 +5,9 @@ type TeamMessage = '🟥チームAの番です' | '🟦チームBの番です';
 type State = {
   scoreA: number;
   foulA: number;
+  pointsA: number[];
   scoreB: number;
+  pointsB: number[];
   foulB: number;
   turn: 'A' | 'B';
 };
@@ -15,7 +17,7 @@ interface GameResultModalProps {
   onReset: () => void;
 }
 
-const initialState: State = { scoreA: 0, foulA: 0, scoreB: 0, foulB: 0, turn: 'A' };
+const initialState: State = { scoreA: 0, foulA: 0, pointsA: [], scoreB: 0, pointsB: [], foulB: 0, turn: 'A' };
 
 export default function CalculationMolkky() {
   const [winner, setWinner] = useState<Team | null>(null);
@@ -29,15 +31,19 @@ export default function CalculationMolkky() {
         ? {
             scoreA: current.scoreA + point > 50 ? 25 : current.scoreA + point,
             foulA: point == 0 ? current.foulA + 1 : 0,
+            pointsA: [...current.pointsA, point],
             scoreB: current.scoreB,
             foulB: current.foulB,
+            pointsB: current.pointsB,
             turn: 'B',
           }
         : {
             scoreA: current.scoreA,
             foulA: current.foulA,
+            pointsA: current.pointsA,
             scoreB: current.scoreB + point > 50 ? 25 : current.scoreB + point,
             foulB: point == 0 ? current.foulB + 1 : 0,
+            pointsB: [...current.pointsB, point],
             turn: 'A',
           },
     ]);
@@ -76,9 +82,9 @@ export default function CalculationMolkky() {
           <h1 className="text-xl font-bold">モルック・スコア計算(2チーム)</h1>
         </header>
 
-        <div className="w-full flex items-stretch bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div className="w-full flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
           {displayTeamScore('A')}
-          <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-2 text-[10px] font-bold text-gray-400 border-x border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-1 text-[10px] font-bold text-gray-400 border-y border-gray-100 dark:border-gray-700">
             VS
           </div>
           {displayTeamScore('B')}
@@ -133,6 +139,9 @@ export default function CalculationMolkky() {
 
   function displayTeamScore(team: Team) {
     const foulCount = team === 'A' ? current.foulA : current.foulB;
+    const points = team === 'A' ? current.pointsA : current.pointsB;
+    const lastThree = points.slice(-3);
+
     return (
       <div
         id={team == 'A' ? 'team-a-box' : 'team-b-box'}
@@ -143,8 +152,21 @@ export default function CalculationMolkky() {
           <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
             TEAM {team == 'A' ? 'A🟥' : 'B🟦'}
           </span>
-          <div className="flex items-center gap-2">
-            {team == 'A' ? `${current.scoreA}点` : `${current.scoreB}点`}
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex gap-1 h-8 items-center">
+              {lastThree.length > 0 ? (
+                lastThree.map((p, i) => (
+                  <span key={i} className="text-sm font-bold bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded shadow-sm">
+                    {p}
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm text-gray-400">-</span>
+              )}
+            </div>
+            <div className="text-[10px] text-gray-400">
+              合計: {team === 'A' ? current.scoreA : current.scoreB}点
+            </div>
           </div>
           <div className="h-5 flex items-center justify-center">
             {foulCount > 0 && (
