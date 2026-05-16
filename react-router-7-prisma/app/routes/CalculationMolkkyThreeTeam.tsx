@@ -5,13 +5,13 @@ type TeamMessage = '🟥チームAの番です' | '🟦チームBの番です' |
 type State = {
   scoreA: number;
   foulA: number;
-  pointsA: number[];
+  pointsA: (number | 'ファウル')[];
   scoreB: number;
   foulB: number;
-  pointsB: number[];
+  pointsB: (number | 'ファウル')[];
   scoreC: number;
   foulC: number;
-  pointsC: number[];
+  pointsC: (number | 'ファウル')[];
   loser: Team | null;
   turn: 'A' | 'B' | 'C';
 };
@@ -55,7 +55,7 @@ export default function CalculationMolkkyThreeTeam() {
           {
             scoreA: current.scoreA,
             foulA: current.foulA + 1,
-            pointsA: [...current.pointsA, 0],
+            pointsA: [...current.pointsA, 'ファウル'],
             scoreB: current.scoreB,
             foulB: current.foulB,
             pointsB: current.pointsB,
@@ -84,7 +84,7 @@ export default function CalculationMolkkyThreeTeam() {
             pointsA: current.pointsA,
             scoreB: current.scoreB,
             foulB: current.foulB + 1,
-            pointsB: [...current.pointsB, 0],
+            pointsB: [...current.pointsB, 'ファウル'],
             scoreC: current.scoreC,
             foulC: current.foulC,
             pointsC: current.pointsC,
@@ -113,7 +113,7 @@ export default function CalculationMolkkyThreeTeam() {
             pointsB: current.pointsB,
             scoreC: current.scoreC,
             foulC: current.foulC + 1,
-            pointsC: [...current.pointsC, 0],
+            pointsC: [...current.pointsC, 'ファウル'],
             loser: 'C',
             turn: 'A',
           },
@@ -128,7 +128,7 @@ export default function CalculationMolkkyThreeTeam() {
         ? {
             scoreA: current.scoreA + point > 50 ? 25 : current.scoreA + point,
             foulA: point == 0 ? current.foulA + 1 : 0,
-            pointsA: [...current.pointsA, point],
+            pointsA: [...current.pointsA, point === 0 ? 'ファウル' : point],
             scoreB: current.scoreB,
             foulB: current.foulB,
             pointsB: current.pointsB,
@@ -145,7 +145,7 @@ export default function CalculationMolkkyThreeTeam() {
               pointsA: current.pointsA,
               scoreB: current.scoreB + point > 50 ? 25 : current.scoreB + point,
               foulB: point == 0 ? current.foulB + 1 : 0,
-              pointsB: [...current.pointsB, point],
+              pointsB: [...current.pointsB, point === 0 ? 'ファウル' : point],
               scoreC: current.scoreC,
               foulC: current.foulC,
               pointsC: current.pointsC,
@@ -161,7 +161,7 @@ export default function CalculationMolkkyThreeTeam() {
               pointsB: current.pointsB,
               scoreC: current.scoreC + point > 50 ? 25 : current.scoreC + point,
               foulC: point == 0 ? current.foulC + 1 : 0,
-              pointsC: [...current.pointsC, point],
+              pointsC: [...current.pointsC, point === 0 ? 'ファウル' : point],
               loser: null,
               turn: loser == 'A' ? 'B' : 'A',
             },
@@ -301,7 +301,11 @@ export default function CalculationMolkkyThreeTeam() {
                 lastThree.map((p, i) => (
                   <span
                     key={i}
-                    className="text-[10px] font-mono font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded shadow-sm"
+                    className={`text-[10px] font-mono font-bold bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded shadow-sm ${
+                      p === 'ファウル'
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-gray-600 dark:text-gray-300'
+                    }`}
                   >
                     {p}
                   </span>

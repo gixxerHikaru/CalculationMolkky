@@ -5,9 +5,9 @@ type TeamMessage = '🟥チームAの番です' | '🟦チームBの番です';
 type State = {
   scoreA: number;
   foulA: number;
-  pointsA: number[];
+  pointsA: (number | 'ファウル')[];
   scoreB: number;
-  pointsB: number[];
+  pointsB: (number | 'ファウル')[];
   foulB: number;
   turn: 'A' | 'B';
 };
@@ -17,7 +17,15 @@ interface GameResultModalProps {
   onReset: () => void;
 }
 
-const initialState: State = { scoreA: 0, foulA: 0, pointsA: [], scoreB: 0, pointsB: [], foulB: 0, turn: 'A' };
+const initialState: State = {
+  scoreA: 0,
+  foulA: 0,
+  pointsA: [],
+  scoreB: 0,
+  pointsB: [],
+  foulB: 0,
+  turn: 'A',
+};
 
 export default function CalculationMolkky() {
   const [winner, setWinner] = useState<Team | null>(null);
@@ -31,7 +39,7 @@ export default function CalculationMolkky() {
         ? {
             scoreA: current.scoreA + point > 50 ? 25 : current.scoreA + point,
             foulA: point == 0 ? current.foulA + 1 : 0,
-            pointsA: [...current.pointsA, point],
+            pointsA: [...current.pointsA, point === 0 ? 'ファウル' : point],
             scoreB: current.scoreB,
             foulB: current.foulB,
             pointsB: current.pointsB,
@@ -43,7 +51,7 @@ export default function CalculationMolkky() {
             pointsA: current.pointsA,
             scoreB: current.scoreB + point > 50 ? 25 : current.scoreB + point,
             foulB: point == 0 ? current.foulB + 1 : 0,
-            pointsB: [...current.pointsB, point],
+            pointsB: [...current.pointsB, point === 0 ? 'ファウル' : point],
             turn: 'A',
           },
     ]);
@@ -156,7 +164,12 @@ export default function CalculationMolkky() {
             <div className="flex gap-1 h-8 items-center">
               {lastThree.length > 0 ? (
                 lastThree.map((p, i) => (
-                  <span key={i} className="text-sm font-bold bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded shadow-sm">
+                  <span
+                    key={i}
+                    className={`text-sm font-bold bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded shadow-sm ${
+                      p === 'ファウル' ? 'text-red-600 dark:text-red-400' : ''
+                    }`}
+                  >
                     {p}
                   </span>
                 ))
