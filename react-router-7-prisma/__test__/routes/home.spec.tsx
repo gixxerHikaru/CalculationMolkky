@@ -11,14 +11,6 @@ const Stub = createRoutesStub([
     path: '/',
     Component: Home,
   },
-  {
-    path: '/two_team',
-    Component: CalculationMolkky,
-  },
-  {
-    path: '/three_team',
-    Component: CalculationMolkkyThreeTeam,
-  },
 ]);
 
 test('「モルック・スコア計算」のタイトルが見える', () => {
@@ -30,34 +22,17 @@ test('「モルック・スコア計算」のタイトルが見える', () => {
 test('2チームで遊ぶのリンクが見えて、リンクを押すと2チーム用の画面に遷移する', async () => {
   render(<Stub initialEntries={['/']} />);
 
-  const link = screen.getByRole('link', { name: '2チームで遊ぶ' });
+  const link = screen.getByRole('button', { name: '2チームで遊ぶ' });
   expect(link).toBeInTheDocument();
   await userEvent.click(link);
   expect(await screen.findByText('モルック・スコア計算(2チーム)')).toBeInTheDocument();
 });
 
-test('3チームで遊ぶのリンクが見えて、リンクを押すと2チーム用の画面に遷移する', async () => {
+test('3チームで遊ぶのリンクが見えて、リンクを押すと3チーム用の画面に遷移する', async () => {
   render(<Stub initialEntries={['/']} />);
 
-  const link = screen.getByRole('link', { name: '3チームで遊ぶ' });
+  const link = screen.getByRole('button', { name: '3チームで遊ぶ' });
   expect(link).toBeInTheDocument();
   await userEvent.click(link);
   expect(await screen.findByText('モルック・スコア計算(3チーム)')).toBeInTheDocument();
 });
-
-const StubWithThreeTeamLink = createRoutesStub([
-  {
-    path: '/',
-    Component: Home,
-    children: [
-      {
-        path: 'calculation_molkky',
-        Component: CalculationMolkky,
-      },
-      {
-        path: 'calculation_molkky/three_team',
-        Component: () => <div>モルック・スコア計算(3チーム)</div>,
-      },
-    ],
-  },
-]);

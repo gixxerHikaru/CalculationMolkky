@@ -7,31 +7,31 @@ import userEvent from '@testing-library/user-event';
 
 const Stub = createRoutesStub([
   {
-    path: '/two_team',
-    Component: CalculationMolkky,
+    path: '/',
+    Component: () => <CalculationMolkky membersA={null} membersB={null} />,
   },
 ]);
 
 describe('初期表示', () => {
   test('「モルック・スコア計算」のタイトルが見える', () => {
-    render(<Stub initialEntries={['/two_team']} />);
+    render(<Stub initialEntries={['/']} />);
 
     expect(screen.getByText('モルック・スコア計算(2チーム)'));
   });
 
   test('2チームの合計得点が見える', () => {
-    render(<Stub initialEntries={['/two_team']} />);
-    expect(screen.getByText('TEAM A🟥'));
-    const sectionA = screen.getByText('TEAM A🟥').closest('div');
+    render(<Stub initialEntries={['/']} />);
+    const sectionA = screen.getByTestId('team-a-box');
+    expect(within(sectionA).getByText('TEAM A🟥')).toBeInTheDocument();
     expect(sectionA).toHaveTextContent('0点');
-    expect(screen.getByText('VS'));
-    expect(screen.getByText('TEAM B🟦'));
-    const sectionB = screen.getByText('TEAM B🟦').closest('div');
+    expect(screen.getByText('VS')).toBeInTheDocument();
+    const sectionB = screen.getByTestId('team-b-box');
+    expect(within(sectionB).getByText('TEAM B🟦')).toBeInTheDocument();
     expect(sectionB).toHaveTextContent('0点');
   });
 
   test('1~12のスコアボタンとFoulボタンが見える', () => {
-    render(<Stub initialEntries={['/two_team']} />);
+    render(<Stub initialEntries={['/']} />);
     expect(screen.getByRole('button', { name: '1点' }));
     expect(screen.getByRole('button', { name: '2点' }));
     expect(screen.getByRole('button', { name: '3点' }));
@@ -49,7 +49,7 @@ describe('初期表示', () => {
   });
 
   test('チームAの番ですが見える', () => {
-    render(<Stub initialEntries={['/two_team']} />);
+    render(<Stub initialEntries={['/']} />);
     expect(screen.getByText('🟥チームAの番です'));
   });
 });
@@ -98,7 +98,7 @@ describe('スコアの更新', () => {
   }
 
   test('チームAとチームBが交互に得点し、スコアと攻撃権が正しく遷移する', async () => {
-    render(<Stub initialEntries={['/two_team']} />);
+    render(<Stub initialEntries={['/']} />);
 
     const steps = [
       { point: 12, a: 12, b: 0 },
@@ -121,7 +121,7 @@ describe('スコアの更新', () => {
   });
 
   test('番手のチームの合計スコアにハイライトが当たり、そうでないチームにはつかない', async () => {
-    render(<Stub initialEntries={['/two_team']} />);
+    render(<Stub initialEntries={['/']} />);
 
     await waitFor(async () => {
       const teamABox = await screen.findByTestId('team-a-box');
@@ -137,7 +137,7 @@ describe('スコアの更新', () => {
   });
 
   test('ファウルボタンを押すと、得点は加算されずに攻撃権が移り、合計スコアの下にファウル回数が表示される', async () => {
-    render(<Stub initialEntries={['/two_team']} />);
+    render(<Stub initialEntries={['/']} />);
 
     const foulButton = await screen.findByRole('button', { name: 'ファウル' });
 
@@ -149,7 +149,7 @@ describe('スコアの更新', () => {
   });
 
   test('ファウル回数が表示されている状態で、得点をすると得点した側のファウル回数がリセットされる', async () => {
-    render(<Stub initialEntries={['/two_team']} />);
+    render(<Stub initialEntries={['/']} />);
 
     const foulButton = await screen.findByRole('button', { name: 'ファウル' });
 
@@ -170,7 +170,7 @@ describe('スコアの更新', () => {
   });
 
   test('戻るボタンを押すと、前の状態に戻る', async () => {
-    render(<Stub initialEntries={['/two_team']} />);
+    render(<Stub initialEntries={['/']} />);
     await playAndAssert(5, 5, 0);
     await playAndAssert(3, 5, 3);
 
@@ -179,7 +179,7 @@ describe('スコアの更新', () => {
   });
 
   test('50点を超えると、超えた側のスコアが25点にリセットされ、攻撃権が移る', async () => {
-    render(<Stub initialEntries={['/two_team']} />);
+    render(<Stub initialEntries={['/']} />);
     const steps = [
       { point: 12, a: 12, b: 0 },
       { point: 12, a: 12, b: 12 },
@@ -200,7 +200,7 @@ describe('スコアの更新', () => {
 
   describe('勝利条件', () => {
     test('50点丁度の場合は勝利モーダルが表示される', async () => {
-      render(<Stub initialEntries={['/two_team']} />);
+      render(<Stub initialEntries={['/']} />);
       const steps = [
         { point: 12, a: 12, b: 0 },
         { point: 12, a: 12, b: 12 },
@@ -222,7 +222,7 @@ describe('スコアの更新', () => {
     });
 
     test('50点丁度の場合は勝利モーダルが表示される', async () => {
-      render(<Stub initialEntries={['/two_team']} />);
+      render(<Stub initialEntries={['/']} />);
       const steps = [
         { point: 1, a: 1, b: 0 },
         { point: 12, a: 1, b: 12 },
@@ -245,7 +245,7 @@ describe('スコアの更新', () => {
     });
 
     test('モーダルには「もう一度」ボタンがあり、押すと初期状態からゲームができる画面になる', async () => {
-      render(<Stub initialEntries={['/two_team']} />);
+      render(<Stub initialEntries={['/']} />);
       const steps = [
         { point: 12, a: 12, b: 0 },
         { point: 12, a: 12, b: 12 },
@@ -276,7 +276,7 @@ describe('スコアの更新', () => {
 
   describe('敗北条件', () => {
     test('ファウルが3回になると、そのチームの敗北が表示される', async () => {
-      render(<Stub initialEntries={['/two_team']} />);
+      render(<Stub initialEntries={['/']} />);
 
       const foulButton = await screen.findByRole('button', { name: 'ファウル' });
 
@@ -290,7 +290,7 @@ describe('スコアの更新', () => {
       assert.exists(loseMsg);
     });
     test('ファウルが3回になると、そのチームの敗北が表示される', async () => {
-      render(<Stub initialEntries={['/two_team']} />);
+      render(<Stub initialEntries={['/']} />);
 
       const foulButton = await screen.findByRole('button', { name: 'ファウル' });
 
@@ -305,7 +305,7 @@ describe('スコアの更新', () => {
       assert.exists(loseMsg);
     });
     test('モーダルには「もう一度」ボタンがあり、押すと初期状態からゲームができる画面になる', async () => {
-      render(<Stub initialEntries={['/two_team']} />);
+      render(<Stub initialEntries={['/']} />);
       const foulButton = await screen.findByRole('button', { name: 'ファウル' });
 
       await user.click(foulButton);
