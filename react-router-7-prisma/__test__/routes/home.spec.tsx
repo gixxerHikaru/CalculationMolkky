@@ -19,7 +19,7 @@ test('「モルック・スコア計算」のタイトルが見える', () => {
   expect(screen.getByText('モルック・スコア計算'));
 });
 
-test('2チームで遊ぶのリンクが見えて、リンクを押すと2チーム用の画面に遷移する', async () => {
+test('2チームで遊ぶのボタンが見えて、ボタンを押すと2チーム用の画面に遷移する', async () => {
   render(<Stub initialEntries={['/']} />);
 
   const link = screen.getByRole('button', { name: '2チームで遊ぶ' });
@@ -28,11 +28,20 @@ test('2チームで遊ぶのリンクが見えて、リンクを押すと2チー
   expect(await screen.findByText('モルック・スコア計算(2チーム)')).toBeInTheDocument();
 });
 
-test('3チームで遊ぶのリンクが見えて、リンクを押すと3チーム用の画面に遷移する', async () => {
+test('3チームで遊ぶのボタンが見えて、ボタンを押すと3チーム用の画面に遷移する', async () => {
   render(<Stub initialEntries={['/']} />);
 
   const link = screen.getByRole('button', { name: '3チームで遊ぶ' });
   expect(link).toBeInTheDocument();
   await userEvent.click(link);
   expect(await screen.findByText('モルック・スコア計算(3チーム)')).toBeInTheDocument();
+});
+
+test('メンバーを登録して遊ぶボタンが見え、ボタンを押すとメンバー登録画面に遷移する', async () => {
+  render(<Stub initialEntries={['/']} />);
+
+  const link = screen.getByRole('button', { name: '👥 メンバーを登録して遊ぶ' });
+  expect(link).toBeInTheDocument();
+  await userEvent.click(link);
+  expect(await screen.findByText('メンバー登録')).toBeInTheDocument();
 });

@@ -35,7 +35,19 @@ const initialState: State = {
   turn: 'A',
 };
 
-export default function CalculationMolkkyThreeTeam() {
+interface CalculationMolkkyThreeTeamProps {
+  membersA: string | null;
+  membersB: string | null;
+  membersC: string | null;
+  onBack: () => void;
+}
+
+export default function CalculationMolkkyThreeTeam({
+  membersA,
+  membersB,
+  membersC,
+  onBack,
+}: CalculationMolkkyThreeTeamProps) {
   const [winner, setWinner] = useState<Team | null>(null);
   const [loser, setLoser] = useState<Team | null>(null);
   const [loserFlag, setLoserFlag] = useState<Boolean>(false);
@@ -190,70 +202,66 @@ export default function CalculationMolkkyThreeTeam() {
         <header className="w-full flex flex-col items-center py-2 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
           <h1 className="text-xl font-bold">モルック・スコア計算(3チーム)</h1>
         </header>
-      </div>
-      <div className="w-full flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden mb-4">
-        {displayTeamScore('A')}
-        <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-1 text-[8px] font-bold text-gray-400 border-y border-gray-100 dark:border-gray-700">
-          VS
-        </div>
-        {displayTeamScore('B')}
-        <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-1 text-[8px] font-bold text-gray-400 border-y border-gray-100 dark:border-gray-700">
-          VS
-        </div>
-        {displayTeamScore('C')}
-      </div>
-
-      <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
-        <div className="w-full p-2 bg-white dark:bg-gray-800 rounded-l">
-          <p className="text-sm">{teamMessage}</p>
+        <button onClick={onBack} className="text-xs text-indigo-500 font-bold hover:underline">
+          ← 戻る
+        </button>
+        <div className="w-full flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden mb-4">
+          {displayTeamScore('A')}
+          <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-1 text-[8px] font-bold text-gray-400 border-y border-gray-100 dark:border-gray-700">
+            VS
+          </div>
+          {displayTeamScore('B')}
+          <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-1 text-[8px] font-bold text-gray-400 border-y border-gray-100 dark:border-gray-700">
+            VS
+          </div>
+          {displayTeamScore('C')}
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
-          {[...Array(12)].map((_, i) => (
+        <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="w-full p-2 bg-white dark:bg-gray-800 rounded-l">
+            <p className="text-sm">{teamMessage}</p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            {[...Array(12)].map((_, i) => (
+              <button
+                key={i + 1}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-300"
+                onClick={() => {
+                  handleScore(i + 1);
+                }}
+              >
+                {i + 1}点
+              </button>
+            ))}
+            <div />
             <button
-              key={i + 1}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-300"
-              onClick={() => {
-                handleScore(i + 1);
-              }}
+              className="flex items-center justify-center h-16 text-lg font-bold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl active:scale-95 transition-all border border-red-100 dark:border-red-800"
+              onClick={() => handleScore(0)}
             >
-              {i + 1}点
+              ファウル
             </button>
-          ))}
-          <div />
-          <button
-            className="flex items-center justify-center h-16 text-lg font-bold bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl active:scale-95 transition-all border border-red-100 dark:border-red-800"
-            onClick={() => handleScore(0)}
-          >
-            ファウル
-          </button>
-          <button
-            className="flex items-center justify-center h-16 text-lg font-bold bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl active:scale-95 transition-all border border-amber-100 dark:border-amber-800"
-            onClick={() => handleBack()}
-          >
-            戻る
-          </button>
+            <button
+              className="flex items-center justify-center h-16 text-lg font-bold bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl active:scale-95 transition-all border border-amber-100 dark:border-amber-800"
+              onClick={() => handleBack()}
+            >
+              戻る
+            </button>
+          </div>
         </div>
       </div>
+
       {activeModal && (
-        <GameResultModal
-          team={activeModal.team}
-          type={activeModal.type}
-          onReset={() => {
-            setWinner(null);
-            setLoser(null);
-            setHistory([initialState]);
-          }}
-        />
+        <GameResultModal team={activeModal.team} type={activeModal.type} onReset={onBack} />
       )}
     </main>
   );
 
   function displayTeamScore(team: Team) {
-    // テストコードが期待する「A、B、それ以外(C)」のロジックを安全にオブジェクト化
     const teamConfig = {
       A: {
         label: 'TEAM A🟥',
+        members: membersA,
         id: 'team-a-box',
         foul: current.foulA,
         points: current.pointsA,
@@ -261,6 +269,7 @@ export default function CalculationMolkkyThreeTeam() {
       },
       B: {
         label: 'TEAM B🟦',
+        members: membersB,
         id: 'team-b-box',
         foul: current.foulB,
         points: current.pointsB,
@@ -268,6 +277,7 @@ export default function CalculationMolkkyThreeTeam() {
       },
       C: {
         label: 'TEAM C🟩',
+        members: membersC,
         id: 'team-c-box',
         foul: current.foulC,
         points: current.pointsC,
@@ -275,7 +285,7 @@ export default function CalculationMolkkyThreeTeam() {
       },
     };
 
-    const { label, id, foul, points, score } = teamConfig[team];
+    const { label, members, id, foul, points, score } = teamConfig[team];
     const lastThree = points.slice(-3);
     const isCurrentTurn = current.turn === team;
 
@@ -291,7 +301,14 @@ export default function CalculationMolkkyThreeTeam() {
       >
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{label}</span>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{label}</span>
+              {members && (
+                <span className="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[120px]">
+                  {members}
+                </span>
+              )}
+            </div>
             <div className="text-sm font-bold text-gray-800 dark:text-gray-100">{score}点</div>
           </div>
 
@@ -331,16 +348,16 @@ export default function CalculationMolkkyThreeTeam() {
   }
 
   function getTeamMessage() {
-    let teamMessage: TeamMessage = '🟥チームAの番です';
+    let teamMessage: TeamMessage | null = null;
     switch (current.turn) {
       case 'A':
-        teamMessage = '🟥チームAの番です';
+        teamMessage = `🟥チームAの番です`;
         break;
       case 'B':
-        teamMessage = '🟦チームBの番です';
+        teamMessage = `🟦チームBの番です`;
         break;
       case 'C':
-        teamMessage = '🟩チームCの番です';
+        teamMessage = `🟩チームCの番です`;
         break;
     }
     return teamMessage;

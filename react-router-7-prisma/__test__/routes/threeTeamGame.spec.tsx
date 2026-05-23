@@ -1,21 +1,38 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
+import { useState } from 'react';
 import { assert, expect, test } from 'vitest';
 import { createRoutesStub } from 'react-router';
 import { describe } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import CalculationMolkkyThreeTeam, { type Team } from '~/routes/CalculationMolkkyThreeTeam';
 
+const testMembersA = 'プレイヤー1, プレイヤー2';
+const testMembersB = 'プレイヤー3, プレイヤー4';
+const testMembersC = 'プレイヤー5, プレイヤー6';
+
 const Stub = createRoutesStub([
   {
     path: '/',
-    Component: () => (
-      <CalculationMolkkyThreeTeam
-        membersA={null}
-        membersB={null}
-        membersC={null}
-        onBack={() => {}}
-      />
-    ),
+    Component: () => {
+      const [showSetup, setShowSetup] = useState(false);
+      if (showSetup)
+        return (
+          <div>
+            <div>メンバー登録</div>
+            <p>{testMembersA}</p>
+            <p>{testMembersB}</p>
+            <p>{testMembersC}</p>
+          </div>
+        );
+      return (
+        <CalculationMolkkyThreeTeam
+          membersA={testMembersA}
+          membersB={testMembersB}
+          membersC={testMembersC}
+          onBack={() => setShowSetup(true)}
+        />
+      );
+    },
   },
 ]);
 
@@ -61,6 +78,59 @@ describe('初期表示', () => {
   test('チームAの番ですが見える', () => {
     render(<Stub initialEntries={['/']} />);
     expect(screen.getByText('🟥チームAの番です'));
+  });
+
+  test('渡されたメンバー名が各チームのボックスに表示される', () => {
+    render(<Stub initialEntries={['/']} />);
+
+    const sectionA = screen.getByTestId('team-a-box');
+    expect(within(sectionA).getByText(testMembersA)).toBeInTheDocument();
+
+    const sectionB = screen.getByTestId('team-b-box');
+    expect(within(sectionB).getByText(testMembersB)).toBeInTheDocument();
+
+    const sectionC = screen.getByTestId('team-c-box');
+    expect(within(sectionC).getByText(testMembersC)).toBeInTheDocument();
+  });
+
+  describe('戻るボタン', () => {
+    test('ユーザーが登録された状態で、「← 戻る」ボタンを押すとユーザー登録画面に遷移し登録されたメンバーが表示される', async () => {
+      render(<Stub initialEntries={['/']} />);
+
+      const backButton = screen.getByText('← 戻る');
+      await userEvent.click(backButton);
+
+      expect(await screen.findByText('メンバー登録')).toBeInTheDocument();
+      expect(await screen.findByText(testMembersA)).toBeInTheDocument();
+      expect(await screen.findByText(testMembersB)).toBeInTheDocument();
+      expect(await screen.findByText(testMembersC)).toBeInTheDocument();
+    });
+
+    test('ユーザーが登録されていない状態で、「← 戻る」ボタンを押すと初期画面に遷移する', async () => {
+      const StubNoMembers = createRoutesStub([
+        {
+          path: '/',
+          Component: () => {
+            const [view, setView] = useState('GAME');
+            if (view === 'MENU') return <div>モルック・スコア計算</div>;
+            return (
+              <CalculationMolkkyThreeTeam
+                membersA={null}
+                membersB={null}
+                membersC={null}
+                onBack={() => setView('MENU')}
+              />
+            );
+          },
+        },
+      ]);
+      render(<StubNoMembers initialEntries={['/']} />);
+
+      const backButton = screen.getByText('← 戻る');
+      await userEvent.click(backButton);
+
+      expect(await screen.findByText('モルック・スコア計算')).toBeInTheDocument();
+    });
   });
 });
 
@@ -318,10 +388,7 @@ describe('スコアの更新', () => {
       const resetButton = await screen.findByRole('button', { name: 'もう一度' });
       await user.click(resetButton);
 
-      expect(screen.getByText('🟥チームAの番です'));
-      assertTeamState('A', 0, 0);
-      assertTeamState('B', 0, 0);
-      assertTeamState('C', 0, 0);
+      expect(await screen.findByText('メンバー登録')).toBeInTheDocument();
     });
   });
 

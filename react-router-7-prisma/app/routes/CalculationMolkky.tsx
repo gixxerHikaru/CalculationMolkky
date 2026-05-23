@@ -27,7 +27,13 @@ const initialState: State = {
   turn: 'A',
 };
 
-export default function CalculationMolkky() {
+interface CalculationMolkkyProps {
+  membersA: string | null;
+  membersB: string | null;
+  onBack: () => void;
+}
+
+export default function CalculationMolkky({ membersA, membersB, onBack }: CalculationMolkkyProps) {
   const [winner, setWinner] = useState<Team | null>(null);
   const [loser, setLoser] = useState<Team | null>(null);
   const [history, setHistory] = useState<State[]>([initialState]);
@@ -90,6 +96,10 @@ export default function CalculationMolkky() {
           <h1 className="text-xl font-bold">モルック・スコア計算(2チーム)</h1>
         </header>
 
+        <button onClick={onBack} className="text-xs text-indigo-500 font-bold hover:underline">
+          ← 戻る
+        </button>
+
         <div className="w-full flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
           {displayTeamScore('A')}
           <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-1 text-[10px] font-bold text-gray-400 border-y border-gray-100 dark:border-gray-700">
@@ -132,15 +142,7 @@ export default function CalculationMolkky() {
         </div>
       </div>
       {activeModal && (
-        <GameResultModal
-          team={activeModal.team}
-          type={activeModal.type}
-          onReset={() => {
-            setWinner(null);
-            setLoser(null);
-            setHistory([initialState]);
-          }}
-        />
+        <GameResultModal team={activeModal.team} type={activeModal.type} onReset={onBack} />
       )}
     </main>
   );
@@ -151,6 +153,7 @@ export default function CalculationMolkky() {
     const points = isA ? current.pointsA : current.pointsB;
     const score = isA ? current.scoreA : current.scoreB;
     const label = isA ? 'TEAM A🟥' : 'TEAM B🟦';
+    const members = isA ? membersA : membersB;
     const id = isA ? 'team-a-box' : 'team-b-box';
     const lastThree = points.slice(-3);
 
@@ -166,7 +169,14 @@ export default function CalculationMolkky() {
       >
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{label}</span>
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{label}</span>
+              {members && (
+                <span className="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[120px]">
+                  {members}
+                </span>
+              )}
+            </div>
             <div className="text-sm font-bold text-gray-800 dark:text-gray-100">{score}点</div>
           </div>
 
