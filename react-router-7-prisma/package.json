@@ -7,20 +7,23 @@
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "test": "vitest"
+    "test": "vitest",
+    "deploy": "npm run build && wrangler deploy",
+    "preview": "npm run build && wrangler dev",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
     "@prisma/extension-accelerate": "^2.0.2",
     "@react-router/node": "^7.9.2",
     "@react-router/serve": "^7.9.2",
-    "isbot": "^5.1.31",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router": "^7.9.3",
     "react-router-dom": "^7.9.3"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.38.0",
     "@react-router/dev": "^7.9.2",
     "@tailwindcss/vite": "^4.1.13",
     "@testing-library/jest-dom": "^6.8.0",
@@ -29,6 +32,7 @@
     "@types/node": "^22",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
+    "isbot": "^5.1.40",
     "jsdom": "^27.0.0",
     "prisma": "^6.16.2",
     "tailwindcss": "^4.1.13",
@@ -36,6 +40,7 @@
     "typescript": "^5.9.2",
     "vite": "^7.1.7",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "wrangler": "^4.94.0"
   }
 }
