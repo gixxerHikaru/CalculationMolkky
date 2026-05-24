@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 type Team = 'A' | 'B';
 type TeamMessage = '🟥チームAの番です' | '🟦チームBの番です';
@@ -38,6 +38,21 @@ export default function CalculationMolkky({ membersA, membersB, onBack }: Calcul
   const [loser, setLoser] = useState<Team | null>(null);
   const [history, setHistory] = useState<State[]>([initialState]);
   const current = history[history.length - 1];
+
+  const scrollRefA = useRef<HTMLDivElement>(null);
+  const scrollRefB = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRefA.current) {
+      scrollRefA.current.scrollTop = scrollRefA.current.scrollHeight;
+    }
+  }, [current.pointsA]);
+
+  useEffect(() => {
+    if (scrollRefB.current) {
+      scrollRefB.current.scrollTop = scrollRefB.current.scrollHeight;
+    }
+  }, [current.pointsB]);
 
   const membersArrayA = membersA
     ? membersA
@@ -117,27 +132,25 @@ export default function CalculationMolkky({ membersA, membersB, onBack }: Calcul
       : null;
 
   return (
-    <main className="min-h-screen flex flex-col items-center pt-8 pb-4 px-4 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
-      <div className="w-full max-w-md flex flex-col items-center gap-4 text-gray-800 dark:text-gray-100">
-        <header className="w-full flex flex-col items-center py-2 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
-          <h1 className="text-xl font-bold">モルック・スコア計算(2チーム)</h1>
-        </header>
-
-        <button onClick={onBack} className="text-xs text-indigo-500 font-bold hover:underline">
+    <main className="h-screen overflow-hidden flex flex-col items-center pt-2 pb-2 px-4 bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      <div className="w-full max-w-md h-full flex flex-col items-center text-gray-800 dark:text-gray-100">
+        <button
+          onClick={onBack}
+          className="w-full text-left text-[10px] text-indigo-500 font-bold hover:underline mb-1"
+        >
           ← 戻る
         </button>
 
-        <div className="w-full flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
-          {displayTeamScore('A')}
-          <div className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-1 text-[10px] font-bold text-gray-400 border-y border-gray-100 dark:border-gray-700">
-            VS
+        <div className="w-full flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-100 dark:border-gray-700">
+          <div className="border-b border-gray-50 dark:border-gray-700">
+            {displayTeamScore('A')}
           </div>
           {displayTeamScore('B')}
         </div>
 
-        <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
-          <div className="w-full p-2 bg-white dark:bg-gray-800 rounded-l">
-            <p className="text-sm">{teamMessage}</p>
+        <div className="w-full p-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mt-2">
+          <div className="w-full px-2 py-1 bg-white dark:bg-gray-800 rounded-l">
+            <p className="text-sm font-bold">{teamMessage}</p>
             {currentPlayer && <p className="text-sm">プレイヤー：{currentPlayer}</p>}
           </div>
 
@@ -175,69 +188,102 @@ export default function CalculationMolkky({ membersA, membersB, onBack }: Calcul
     </main>
   );
 
+  function renderHistoryTable(
+    members: string[],
+    points: (number | 'ファウル')[],
+    activeIndex?: number,
+    scrollRef?: React.RefObject<HTMLDivElement | null>
+  ) {
+    const playerScores: (number | 'ファウル')[][] = members.map(() => []);
+    points.forEach((p, i) => {
+      playerScores[i % members.length].push(p);
+    });
+    const maxRows = Math.max(1, ...playerScores.map(s => s.length));
+
+    return (
+      <div ref={scrollRef} className="overflow-x-auto h-[72px] overflow-y-auto pr-1">
+        <table className="w-full text-[10px] text-left border-separate border-spacing-0">
+          <thead className="sticky top-0 bg-gray-200 dark:bg-gray-600 z-10">
+            <tr>
+              {members.map((m, i) => (
+                <th
+                  key={i}
+                  className={`py-1 px-1 font-bold truncate max-w-[60px] border-b border-gray-100 dark:border-gray-700 ${
+                    i === activeIndex ? 'bg-blue-400 dark:bg-blue-600' : ''
+                  }`}
+                >
+                  {m}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[...Array(maxRows)].map((_, rowIndex) => (
+              <tr
+                key={rowIndex}
+                className="border-b border-gray-50 dark:border-gray-800 last:border-0"
+              >
+                {playerScores.map((scores, colIndex) => (
+                  <td
+                    key={colIndex}
+                    className={`py-1 px-1 ${
+                      scores[rowIndex] === 'ファウル'
+                        ? 'text-red-500 font-bold'
+                        : 'text-gray-600 dark:text-gray-300'
+                    } ${colIndex === activeIndex ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+                  >
+                    {scores[rowIndex] !== undefined ? scores[rowIndex] : '-'}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   function displayTeamScore(team: Team) {
     const isA = team === 'A';
     const foulCount = isA ? current.foulA : current.foulB;
     const points = isA ? current.pointsA : current.pointsB;
     const score = isA ? current.scoreA : current.scoreB;
     const label = isA ? 'TEAM A🟥' : 'TEAM B🟦';
-    const members = isA ? membersA : membersB;
     const id = isA ? 'team-a-box' : 'team-b-box';
-    const lastThree = points.slice(-3);
+    const mArray = isA ? membersArrayA : membersArrayB;
+    const isCurrentTurn = current.turn === team;
+    const activePlayerIndex = isCurrentTurn ? points.length % mArray.length : undefined;
+    const scrollRef = isA ? scrollRefA : scrollRefB;
 
     return (
       <div
         id={id}
         data-testid={id}
-        className={`flex-1 p-4 transition-all ${
-          current.turn === team
+        className={`flex-1 p-3 transition-all ${
+          isCurrentTurn
             ? 'bg-yellow-100 dark:bg-yellow-900/20 ring-2 ring-inset ring-yellow-500'
             : ''
         }`}
       >
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{label}</span>
-              {members && (
-                <span className="text-[10px] text-gray-400 dark:text-gray-500 truncate max-w-[120px]">
-                  {members}
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{label}</span>
+            <div className="flex items-center gap-2">
+              {foulCount > 0 && (
+                <span className="text-[9px] font-bold text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded">
+                  ファウル：{foulCount}
                 </span>
               )}
-            </div>
-            <div className="text-sm font-bold text-gray-800 dark:text-gray-100">{score}点</div>
-          </div>
-
-          <div className="flex items-center justify-between min-h-[24px]">
-            <div className="flex gap-1 items-center">
-              {lastThree.length > 0 ? (
-                lastThree.map((p, i) => (
-                  <span
-                    key={i}
-                    className={`text-[10px] font-mono font-bold bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded shadow-sm ${
-                      p === 'ファウル'
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-gray-600 dark:text-gray-300'
-                    }`}
-                  >
-                    {p}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
-              )}
-            </div>
-
-            <div className="h-5 flex items-center justify-center">
-              {foulCount > 0 && (
-                <div className="text-[10px] font-bold text-red-600 dark:text-red-400">
-                  <span className="bg-red-100 dark:bg-red-900/40 px-1.5 py-0.5 rounded whitespace-nowrap">
-                    ファウル：{foulCount}
-                  </span>
-                </div>
-              )}
+              <span className="text-sm font-bold text-gray-800 dark:text-gray-100">{score}点</span>
             </div>
           </div>
+
+          {/* チーム内スコア履歴テーブル */}
+          {mArray.length > 0 && (
+            <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+              {renderHistoryTable(mArray, points, activePlayerIndex, scrollRef)}
+            </div>
+          )}
         </div>
       </div>
     );

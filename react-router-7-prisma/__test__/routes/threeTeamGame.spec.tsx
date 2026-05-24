@@ -37,12 +37,6 @@ const Stub = createRoutesStub([
 ]);
 
 describe('初期表示', () => {
-  test('「モルック・スコア計算」のタイトルが見える', () => {
-    render(<Stub initialEntries={['/']} />);
-
-    expect(screen.getByText('モルック・スコア計算(3チーム)'));
-  });
-
   test('3チームの合計得点が見える', () => {
     render(<Stub initialEntries={['/']} />);
     const sectionA = screen.getByTestId('team-a-box');
@@ -54,7 +48,6 @@ describe('初期表示', () => {
     const sectionC = screen.getByTestId('team-c-box');
     expect(within(sectionC).getByText('TEAM C🟩')).toBeInTheDocument();
     expect(sectionC).toHaveTextContent('0点');
-    expect(screen.getAllByText('VS')[0]).toBeInTheDocument();
   });
 
   test('1~12のスコアボタンとFoulボタンが見える', () => {
@@ -85,13 +78,16 @@ describe('初期表示', () => {
     render(<Stub initialEntries={['/']} />);
 
     const sectionA = screen.getByTestId('team-a-box');
-    expect(within(sectionA).getByText(testMembersA)).toBeInTheDocument();
+    expect(within(sectionA).getByText('プレイヤー1')).toBeInTheDocument();
+    expect(within(sectionA).getByText('プレイヤー2')).toBeInTheDocument();
 
     const sectionB = screen.getByTestId('team-b-box');
-    expect(within(sectionB).getByText(testMembersB)).toBeInTheDocument();
+    expect(within(sectionB).getByText('プレイヤー3')).toBeInTheDocument();
+    expect(within(sectionB).getByText('プレイヤー4')).toBeInTheDocument();
 
     const sectionC = screen.getByTestId('team-c-box');
-    expect(within(sectionC).getByText(testMembersC)).toBeInTheDocument();
+    expect(within(sectionC).getByText('プレイヤー5')).toBeInTheDocument();
+    expect(within(sectionC).getByText('プレイヤー6')).toBeInTheDocument();
   });
 
   describe('戻るボタン', () => {
