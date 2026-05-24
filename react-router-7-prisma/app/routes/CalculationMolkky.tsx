@@ -38,6 +38,33 @@ export default function CalculationMolkky({ membersA, membersB, onBack }: Calcul
   const [loser, setLoser] = useState<Team | null>(null);
   const [history, setHistory] = useState<State[]>([initialState]);
   const current = history[history.length - 1];
+
+  const membersArrayA = membersA
+    ? membersA
+        .split(',')
+        .map(m => m.trim())
+        .filter(Boolean)
+    : [];
+  const membersArrayB = membersB
+    ? membersB
+        .split(',')
+        .map(m => m.trim())
+        .filter(Boolean)
+    : [];
+
+  const getCurrentPlayer = () => {
+    if (current.turn === 'A') {
+      return membersArrayA.length > 0
+        ? membersArrayA[current.pointsA.length % membersArrayA.length]
+        : null;
+    }
+    return membersArrayB.length > 0
+      ? membersArrayB[current.pointsB.length % membersArrayB.length]
+      : null;
+  };
+
+  const currentPlayer = getCurrentPlayer();
+
   const handleScore = (point: number) => {
     setHistory(prev => [
       ...prev,
@@ -111,6 +138,7 @@ export default function CalculationMolkky({ membersA, membersB, onBack }: Calcul
         <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="w-full p-2 bg-white dark:bg-gray-800 rounded-l">
             <p className="text-sm">{teamMessage}</p>
+            {currentPlayer && <p className="text-sm">プレイヤー：{currentPlayer}</p>}
           </div>
 
           <div className="grid grid-cols-3 gap-4">

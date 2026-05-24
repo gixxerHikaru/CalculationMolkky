@@ -75,9 +75,10 @@ describe('初期表示', () => {
     expect(screen.getByRole('button', { name: '戻る' }));
   });
 
-  test('チームAの番ですが見える', () => {
+  test('チームAの番ですと、投げるプレイヤーがわかる', () => {
     render(<Stub initialEntries={['/']} />);
-    expect(screen.getByText('🟥チームAの番です'));
+    expect(screen.getByText('🟥チームAの番です')).toBeInTheDocument();
+    expect(screen.getByText('プレイヤー：プレイヤー1')).toBeInTheDocument();
   });
 
   test('渡されたメンバー名が各チームのボックスに表示される', () => {
@@ -185,7 +186,7 @@ describe('スコアの更新', () => {
     await assertState(expectedA, expectedB, expectedC);
   }
 
-  test('チームA→B→Cの順番で得点し、スコアと攻撃権が正しく遷移する', async () => {
+  test('チームA→B→Cの順番で得点し、スコアと攻撃権、プレイヤーが正しく遷移する', async () => {
     render(<Stub initialEntries={['/']} />);
 
     const steps = [
@@ -196,9 +197,18 @@ describe('スコアの更新', () => {
       { point: 8, a: 21, b: 19, c: 10 },
       { point: 7, a: 21, b: 19, c: 17 },
     ];
+    const expectedPlayers = [
+      'プレイヤー：プレイヤー1',
+      'プレイヤー：プレイヤー3',
+      'プレイヤー：プレイヤー5',
+      'プレイヤー：プレイヤー2',
+      'プレイヤー：プレイヤー4',
+      'プレイヤー：プレイヤー6',
+    ];
 
-    for (const step of steps) {
-      await playAndAssert(step.point, step.a, step.b, step.c);
+    for (let i = 0; i < steps.length; i++) {
+      expect(await screen.findByText(expectedPlayers[i])).toBeInTheDocument();
+      await playAndAssert(steps[i].point, steps[i].a, steps[i].b, steps[i].c);
     }
   });
 

@@ -53,6 +53,47 @@ export default function CalculationMolkkyThreeTeam({
   const [loserFlag, setLoserFlag] = useState<Boolean>(false);
   const [history, setHistory] = useState<State[]>([initialState]);
   const current = history[history.length - 1];
+
+  const membersArrayA = membersA
+    ? membersA
+        .split(',')
+        .map(m => m.trim())
+        .filter(Boolean)
+    : [];
+  const membersArrayB = membersB
+    ? membersB
+        .split(',')
+        .map(m => m.trim())
+        .filter(Boolean)
+    : [];
+  const membersArrayC = membersC
+    ? membersC
+        .split(',')
+        .map(m => m.trim())
+        .filter(Boolean)
+    : [];
+
+  const getCurrentPlayer = () => {
+    if (current.turn === 'A') {
+      return membersArrayA.length > 0
+        ? membersArrayA[current.pointsA.length % membersArrayA.length]
+        : null;
+    }
+    if (current.turn === 'B') {
+      return membersArrayB.length > 0
+        ? membersArrayB[current.pointsB.length % membersArrayB.length]
+        : null;
+    }
+    if (current.turn === 'C') {
+      return membersArrayC.length > 0
+        ? membersArrayC[current.pointsC.length % membersArrayC.length]
+        : null;
+    }
+    return null;
+  };
+
+  const currentPlayer = getCurrentPlayer();
+
   const handleScore = (point: number) => {
     if (current.turn === 'A') {
       if (current.scoreA + point == 50) {
@@ -220,6 +261,7 @@ export default function CalculationMolkkyThreeTeam({
         <div className="w-full p-4 bg-white dark:bg-gray-800 rounded-l shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="w-full p-2 bg-white dark:bg-gray-800 rounded-l">
             <p className="text-sm">{teamMessage}</p>
+            {currentPlayer && <p className="text-sm">プレイヤー：{currentPlayer}</p>}
           </div>
 
           <div className="grid grid-cols-3 gap-4">
